@@ -2,7 +2,7 @@
 
 一套 **Capability-first（能力优先）** 的垂直领域 Agent 工厂：用共享 Harness 承载运行时、策略、审批、追踪和评测，再通过可版本化的 Domain Pack 安装领域知识、任务、Skill、工作流与输出契约。
 
-[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [详细使用手册](docs/USAGE.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
+[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
 
 ## 它解决什么问题
 
@@ -29,9 +29,23 @@ flowchart LR
 
 - 可执行 Python Harness：包加载、校验、能力解析、策略、审批、工作流、Trace 和 Eval。
 - 完整 `research` 示例 Domain Pack：2 类任务、4 个 Skill、4 项 Capability、2 条工作流。
-- 30 个 Golden Evals 与 14 个系统测试。
+- 30 个 Golden Evals、14 个核心系统测试与 16 个商业 API/Provider 测试。
 - 交互式 Web UI：演示成功查询、证据不足、Provider 故障、审批拦截和批准写入。
+- 多租户商业 REST API：API Key、限流、配额、计量、幂等和官方模型厂商切换。
 - 领域包规范、模板目录、维护流程与验收清单。
+
+## 商业 API
+
+外部客户可以通过统一的 `/v1/agent/runs` 调用 Agent，服务端再按租户 allowlist 选择 `local`、`openai`、`anthropic` 或 `gemini`。客户不会获得厂商密钥，也不能在请求中自行批准写操作。
+
+```powershell
+python -m pip install -e ".[api]"
+Copy-Item config/commercial.example.yaml config/commercial.yaml
+$env:VAF_API_KEY_DEMO = "replace-with-a-long-random-customer-key"
+vertical-agent-api
+```
+
+完整配置、调用和生产部署要求见[商业 API 接入与部署](docs/COMMERCIAL_API.md)。
 
 ## 5 分钟快速开始
 
@@ -82,6 +96,7 @@ pnpm run dev
 ## 自测试
 
 ```powershell
+python -m pip install -e ".[api,api-test]"
 python -m pytest -q
 python -m vertical_agent_factory.cli --root . validate --domain research
 python -m vertical_agent_factory.cli --root . eval --domain research
@@ -91,12 +106,13 @@ pnpm run lint
 pnpm test
 ```
 
-当前基线：14 个 Python 测试、30/30 Golden Evals、2 个服务端渲染 HTML 测试，生产构建与 lint 通过。
+当前基线：30 个 Python 测试、30/30 Golden Evals、2 个服务端渲染 HTML 测试，生产构建与 lint 通过。
 
 ## 项目结构
 
 ```text
 vertical_agent_factory/   共享 Harness 与 CLI
+vertical_agent_factory/commercial/  多租户商业 API
 domains/research/         领域定义、知识、任务、Schema、工作流
 agents/research/          Agent Manifest 与系统约束
 skills/research/          Skill 契约与执行说明
@@ -107,11 +123,13 @@ evals/                    Golden Cases
 tests/                    Python 系统测试
 web/                      可视化实验室
 docs/                     使用、架构与扩展文档
+config/                   商业 API 配置示例
 ```
 
 ## 从这里继续
 
 - 第一次运行：阅读[详细使用手册](docs/USAGE.md)。
+- 对外提供服务：阅读[商业 API 接入与部署](docs/COMMERCIAL_API.md)。
 - 理解执行链：阅读[架构说明](docs/ARCHITECTURE.md)。
 - 创建新垂直领域：阅读[Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)。
 - 查阅完整规范：从[总体框架](01-VERTICAL_AGENT_FRAMEWORK.md)和[领域包规范](02-DOMAIN_PACKAGE_SPEC.md)开始。
@@ -119,4 +137,3 @@ docs/                     使用、架构与扩展文档
 ## 安全边界
 
 示例 `research` Provider 是本地模拟实现，不会执行真实外部写入。接入真实 MCP、数据库或业务 API 时，应把凭据留在运行环境中，并保持写操作的 Policy、Approval、幂等键和审计 Trace；不要把密钥提交到 Domain Pack。
-

@@ -91,6 +91,7 @@ Get-Content $latestRun.FullName
 后端与领域包：
 
 ```powershell
+python -m pip install -e ".[api,api-test]"
 python -m pytest -q
 vertical-agent --root . validate --domain research
 vertical-agent --root . eval --domain research
@@ -105,7 +106,7 @@ pnpm run lint
 pnpm test
 ```
 
-`pnpm test` 会先执行生产构建，再运行服务端渲染 HTML 测试。当前基线是 14 个 Python 测试、30/30 Golden Evals 和 2 个 HTML 测试。
+`pnpm test` 会先执行生产构建，再运行服务端渲染 HTML 测试。当前基线是 30 个 Python 测试、30/30 Golden Evals 和 2 个 HTML 测试。
 
 ## 7. 运行 Web UI
 

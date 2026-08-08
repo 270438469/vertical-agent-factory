@@ -1,0 +1,44 @@
+# Copy to config/commercial.yaml. Never place real API keys in this file.
+project_root: ..
+database_path: .commercial/usage.sqlite3
+
+# Provider credentials are read only from environment variables.
+providers:
+  openai:
+    api_key_env: OPENAI_API_KEY
+  anthropic:
+    api_key_env: ANTHROPIC_API_KEY
+  gemini:
+    api_key_env: GEMINI_API_KEY
+
+tenants:
+  - id: demo-customer
+    api_key_env: VAF_API_KEY_DEMO
+    allowed_domains:
+      - research
+    allowed_tasks:
+      - research.answer.query
+      - research.report.publish
+    allowed_providers:
+      - local
+      - openai
+      - anthropic
+      - gemini
+    default_provider: local
+    allowed_models:
+      # Model allowlists are deliberate cost and governance boundaries.
+      openai:
+        - gpt-5-mini
+      anthropic:
+        - claude-sonnet-4-5
+      gemini:
+        - gemini-2.5-flash
+    default_models:
+      openai: gpt-5-mini
+      anthropic: claude-sonnet-4-5
+      gemini: gemini-2.5-flash
+    # External callers cannot send approvals. Only trusted server-side config can
+    # pre-approve a capability. Keep this empty for real write operations.
+    approved_capabilities: []
+    rate_limit_per_minute: 60
+    monthly_request_quota: 10000

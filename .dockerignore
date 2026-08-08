@@ -1,0 +1,12 @@
+.git
+.github
+.commercial
+.runs
+.pytest_cache
+__pycache__
+*.pyc
+.env
+.venv*
+web/node_modules
+web/.next
+web/dist

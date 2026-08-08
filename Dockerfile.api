@@ -1,0 +1,31 @@
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    VAF_COMMERCIAL_CONFIG=/app/config/commercial.yaml \
+    VAF_API_HOST=0.0.0.0 \
+    VAF_API_PORT=8000
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY vertical_agent_factory ./vertical_agent_factory
+RUN python -m pip install --no-cache-dir ".[api]"
+
+COPY agents ./agents
+COPY capabilities ./capabilities
+COPY domains ./domains
+COPY evals ./evals
+COPY mcp ./mcp
+COPY policies ./policies
+COPY skills ./skills
+COPY config ./config
+
+RUN useradd --create-home --uid 10001 appuser \
+    && mkdir -p /app/.commercial /app/.runs \
+    && chown -R appuser:appuser /app
+
+USER appuser
+EXPOSE 8000
+
+CMD ["vertical-agent-api"]
