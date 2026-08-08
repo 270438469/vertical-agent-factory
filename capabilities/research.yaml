@@ -1,0 +1,41 @@
+capabilities:
+  - id: research.evidence.search
+    description: Search configured evidence sources for material relevant to a question.
+    risk:
+      class: READ
+      level: low
+    side_effect: false
+    required_scopes: []
+    input_schema_ref: domains/research/schemas/query.json
+    output_schema_ref: domains/research/schemas/result.json
+
+  - id: research.answer.synthesize
+    description: Produce a structured answer from retrieved evidence.
+    risk:
+      class: READ
+      level: low
+    side_effect: false
+    required_scopes: []
+    input_schema_ref: domains/research/schemas/query.json
+    output_schema_ref: domains/research/schemas/result.json
+
+  - id: core.evidence.validate
+    description: Enforce evidence requirements on a structured result.
+    risk:
+      class: READ
+      level: low
+    side_effect: false
+    required_scopes: []
+    input_schema_ref: domains/research/schemas/result.json
+    output_schema_ref: domains/research/schemas/result.json
+
+  - id: research.report.publish
+    description: Publish a prepared report to a configured destination.
+    risk:
+      class: WRITE
+      level: high
+    side_effect: true
+    required_scopes:
+      - report.write
+    input_schema_ref: domains/research/schemas/result.json
+    output_schema_ref: domains/research/schemas/result.json

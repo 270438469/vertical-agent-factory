@@ -1,0 +1,20 @@
+id: research.publish-report
+version: 1.0.0
+task_types:
+  - research.report.publish
+preconditions:
+  - target is identified
+inputs:
+  required:
+    - target
+outputs:
+  required:
+    - result
+requires:
+  capabilities:
+    - research.report.publish
+policy:
+  side_effect: write
+runtime:
+  max_steps: 2
+  max_tool_calls: 1

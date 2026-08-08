@@ -1,0 +1,33 @@
+id: research-agent
+version: 1.0.0
+
+domain:
+  id: research
+  version: 1.0.0
+
+task_types:
+  allow:
+    - research.answer.query
+    - research.report.publish
+
+skills:
+  allow:
+    - research.search-evidence
+    - research.synthesize-answer
+    - research.validate-evidence
+    - research.publish-report
+
+capabilities:
+  allow:
+    - research.evidence.search
+    - research.answer.synthesize
+    - core.evidence.validate
+    - research.report.publish
+  deny: []
+
+policies:
+  - research-default
+
+runtime:
+  max_steps: 12
+  max_tool_calls: 20

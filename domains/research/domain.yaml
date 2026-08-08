@@ -1,0 +1,30 @@
+id: research
+version: 1.0.0
+name: Evidence Research
+description: Evidence-first research and report generation demo domain.
+
+scope:
+  include:
+    - questions answerable from the configured knowledge collection
+    - evidence-backed synthesis
+    - simulated report publication with approval
+  exclude:
+    - unrestricted web access
+    - claims without traceable evidence
+    - real external writes in the demo provider
+
+users:
+  - analysts
+  - researchers
+
+autonomy:
+  read: autonomous
+  analyze: autonomous
+  recommend: autonomous
+  write: approval_required
+
+risk:
+  default: low
+
+owners:
+  - platform

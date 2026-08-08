@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResearchQuery",
+  "type": "object",
+  "required": ["query"],
+  "properties": {
+    "query": {"type": "string"},
+    "simulate_failure": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

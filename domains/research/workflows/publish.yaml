@@ -1,0 +1,14 @@
+id: research.publish-workflow
+version: 1.0.0
+initial_state: AWAITING_POLICY
+
+states:
+  AWAITING_POLICY:
+    action:
+      skill: research.publish-report
+    next: COMPLETED
+    on_failure: FAILED
+
+terminal:
+  - COMPLETED
+  - FAILED

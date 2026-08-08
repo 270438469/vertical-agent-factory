@@ -1,0 +1,21 @@
+id: research.synthesize-answer
+version: 1.0.0
+task_types:
+  - research.answer.query
+preconditions:
+  - evidence search completed
+inputs:
+  required:
+    - query
+    - evidence
+outputs:
+  required:
+    - result
+requires:
+  capabilities:
+    - research.answer.synthesize
+policy:
+  side_effect: none
+runtime:
+  max_steps: 3
+  max_tool_calls: 1

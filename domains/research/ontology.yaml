@@ -1,0 +1,42 @@
+version: 1.0.0
+
+entities:
+  ResearchQuestion:
+    identifiers:
+      - query
+    aliases:
+      - question
+    properties:
+      - language
+      - requested_freshness
+  Evidence:
+    identifiers:
+      - id
+    aliases:
+      - source
+    properties:
+      - title
+      - content
+      - timestamp
+      - trust
+  ResearchResult:
+    identifiers:
+      - run_id
+    aliases:
+      - answer
+    properties:
+      - facts
+      - inferences
+      - uncertainties
+
+relations:
+  - from: ResearchQuestion
+    relation: supported_by
+    to: Evidence
+  - from: ResearchResult
+    relation: answers
+    to: ResearchQuestion
+
+invariants:
+  - Every successful factual result has at least one evidence reference.
+  - Inference is never represented as externally confirmed fact.

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DomainResult",
+  "type": "object",
+  "required": [
+    "status",
+    "summary",
+    "facts",
+    "inferences",
+    "evidence",
+    "actions",
+    "warnings",
+    "uncertainties",
+    "metadata"
+  ],
+  "properties": {
+    "status": {"type": "string"},
+    "summary": {"type": "string"},
+    "facts": {"type": "array"},
+    "inferences": {"type": "array"},
+    "evidence": {"type": "array"},
+    "actions": {"type": "array"},
+    "warnings": {"type": "array"},
+    "uncertainties": {"type": "array"},
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": false
+}

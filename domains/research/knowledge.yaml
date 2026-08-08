@@ -1,0 +1,32 @@
+version: 1.0.0
+documents:
+  - id: architecture-001
+    title: Shared Harness principle
+    source: 01-VERTICAL_AGENT_FRAMEWORK.md
+    timestamp: "2026-08-08T00:00:00Z"
+    trust: primary
+    content: A vertical agent reuses one shared Harness and installs a Domain Package instead of copying the runtime.
+  - id: capability-001
+    title: Capability dependency rule
+    source: 01-VERTICAL_AGENT_FRAMEWORK.md
+    timestamp: "2026-08-08T00:00:00Z"
+    trust: primary
+    content: The required dependency chain is Agent to Skill to Capability to Binding to MCP Tool.
+  - id: policy-001
+    title: Policy layering
+    source: SKILL.md
+    timestamp: "2026-08-08T00:00:00Z"
+    trust: primary
+    content: Lower-level policies may tighten but must not weaken higher-level policy.
+  - id: eval-001
+    title: Evaluation baseline
+    source: 05-CHECKLIST_AND_EVALS.md
+    timestamp: "2026-08-08T00:00:00Z"
+    trust: primary
+    content: A domain package should include at least thirty eval cases across happy, edge, ambiguous, tool failure, policy boundary and adversarial categories.
+  - id: workflow-001
+    title: Workflow design
+    source: 03-GENERATION_AND_MAINTENANCE_WORKFLOW.md
+    timestamp: "2026-08-08T00:00:00Z"
+    trust: primary
+    content: Prefer a deterministic workflow skeleton with model reasoning nodes for high-value or approval-heavy work.
