@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vertical Agent Factory"
+  short_description: "Build and govern vertical agent domain packages"
+  default_prompt: "Use $vertical-agent-factory to create and validate a capability-first domain agent package."

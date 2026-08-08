@@ -1,0 +1,34 @@
+tasks:
+  - id: research.answer.query
+    class: QUERY
+    description: Answer a question using configured evidence.
+    required_entities:
+      - ResearchQuestion
+      - Evidence
+    required_capabilities:
+      - research.evidence.search
+      - research.answer.synthesize
+      - core.evidence.validate
+    evidence:
+      required: true
+    side_effect: false
+    risk: low
+    workflow: research.answer-workflow
+    completion:
+      - a structured result is returned
+      - successful factual claims contain evidence
+
+  - id: research.report.publish
+    class: WRITE
+    description: Publish a prepared report through an approved provider.
+    required_entities:
+      - ResearchResult
+    required_capabilities:
+      - research.report.publish
+    evidence:
+      required: false
+    side_effect: true
+    risk: high
+    workflow: research.publish-workflow
+    completion:
+      - publication action is recorded

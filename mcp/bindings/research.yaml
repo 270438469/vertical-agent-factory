@@ -1,0 +1,40 @@
+bindings:
+  - capability: research.evidence.search
+    implementation:
+      protocol: local
+      handler: research_evidence_search
+    priority: 100
+    health: healthy
+    timeout_seconds: 5
+    retry:
+      maximum: 1
+
+  - capability: research.answer.synthesize
+    implementation:
+      protocol: local
+      handler: research_answer_synthesize
+    priority: 100
+    health: healthy
+    timeout_seconds: 5
+    retry:
+      maximum: 0
+
+  - capability: core.evidence.validate
+    implementation:
+      protocol: local
+      handler: core_evidence_validate
+    priority: 100
+    health: healthy
+    timeout_seconds: 2
+    retry:
+      maximum: 0
+
+  - capability: research.report.publish
+    implementation:
+      protocol: local
+      handler: research_report_publish
+    priority: 100
+    health: healthy
+    timeout_seconds: 5
+    retry:
+      maximum: 0

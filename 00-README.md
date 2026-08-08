@@ -97,3 +97,53 @@ autonomy:
 ```
 
 将上述需求交给 `vertical-agent-factory` Skill，即可按统一规范生成完整 Domain Package。
+
+## 可执行系统
+
+仓库现已包含共享 Harness 和一个完整的 `research` 示例 Domain Pack：
+
+```text
+vertical_agent_factory/  运行时、策略、解析、Trace、Eval 与 CLI
+domains/research/        Domain、Ontology、Tasks、Knowledge、Schemas、Workflows
+agents/research/         Agent Manifest 与系统约束
+skills/research/         可执行 Skill 契约与 Codex Skill 指令
+capabilities/            语义能力注册表
+mcp/bindings/            Provider Binding（示例使用本地 Provider）
+policies/                Domain Policy
+evals/                   30 个 Golden Cases
+```
+
+快速验证：
+
+```powershell
+python -m vertical_agent_factory.cli --root . validate --domain research
+python -m vertical_agent_factory.cli --root . run --domain research `
+  --task research.answer.query --input "query=shared Harness"
+python -m vertical_agent_factory.cli --root . eval --domain research
+```
+
+写操作默认要求审批。示例发布任务可用以下命令验证审批门：
+
+```powershell
+python -m vertical_agent_factory.cli --root . run --domain research `
+  --task research.report.publish --input "target=demo"
+
+python -m vertical_agent_factory.cli --root . run --domain research `
+  --task research.report.publish --input "target=demo" `
+  --approve research.report.publish
+```
+
+运行 Trace 写入 `.runs/<run-id>.jsonl`，可关联 Agent、Skill、Capability、Policy、Binding 和 Workflow 状态。
+
+## 可视化 Web UI
+
+`web/` 提供交互式系统地图，用于讲解运行链、Domain Pack 搭建流程、策略审批、
+Provider 故障以及完整自测试结果。
+
+```powershell
+cd web
+pnpm install
+pnpm run dev
+```
+
+页面包含五种可执行 Trace 演示：证据查询、无足够证据、Provider 故障、审批拦截和已批准写入。

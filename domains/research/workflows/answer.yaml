@@ -1,0 +1,24 @@
+id: research.answer-workflow
+version: 1.0.0
+initial_state: SEARCHING
+
+states:
+  SEARCHING:
+    action:
+      skill: research.search-evidence
+    next: SYNTHESIZING
+    on_failure: FAILED
+  SYNTHESIZING:
+    action:
+      skill: research.synthesize-answer
+    next: VALIDATING
+    on_failure: FAILED
+  VALIDATING:
+    action:
+      skill: research.validate-evidence
+    next: COMPLETED
+    on_failure: FAILED
+
+terminal:
+  - COMPLETED
+  - FAILED

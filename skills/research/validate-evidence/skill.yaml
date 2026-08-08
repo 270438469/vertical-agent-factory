@@ -1,0 +1,20 @@
+id: research.validate-evidence
+version: 1.0.0
+task_types:
+  - research.answer.query
+preconditions:
+  - synthesis completed
+inputs:
+  required:
+    - result
+outputs:
+  required:
+    - result
+requires:
+  capabilities:
+    - core.evidence.validate
+policy:
+  side_effect: none
+runtime:
+  max_steps: 2
+  max_tool_calls: 1

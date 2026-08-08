@@ -1,45 +1,16 @@
 ---
-id: vertical-agent-factory
-name: Vertical Agent Factory
-version: 1.0.0
-status: stable
-
-description: >
-  Design, generate, extend, audit and maintain reusable vertical-domain
-  Agent packages on top of a shared Agent Harness and MCP platform.
-
-triggers:
-  - A new vertical-domain agent must be designed.
-  - An existing domain agent must be extended or refactored.
-  - Domain skills, capabilities, MCP bindings, workflows, policies or evals must be generated.
-  - Multiple domain assets must be kept structurally consistent.
-  - A domain package must be audited for architectural drift.
-
-inputs:
-  type: object
-  required:
-    - domain
-
-outputs:
-  type: object
-  required:
-    - domain_package
-    - generated_assets
-    - validation_report
-
-policy:
-  preserve_core_harness: true
-  capability_first: true
-  tool_hardcoding: deny
-
-runtime:
-  max_phases: 12
+name: vertical-agent-factory
+description: Design, generate, extend, validate, audit, and maintain reusable vertical-domain Agent packages on a shared Harness. Use for Domain Skills, semantic Capabilities, MCP bindings, workflows, policies, schemas, evals, provider replacement, or architecture-drift checks.
 ---
 
 # Objective
 
 Convert a vertical-domain requirement into a structured, versionable and
 maintainable Domain Package without duplicating the shared Harness.
+
+Use `python -m vertical_agent_factory.cli --root <project> validate --domain <id>`
+after changing a package. Use the same CLI with `run` for a smoke test and `eval`
+for Golden Evals.
 
 # Core Invariant
 

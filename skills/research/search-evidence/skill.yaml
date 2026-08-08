@@ -1,0 +1,20 @@
+id: research.search-evidence
+version: 1.0.0
+task_types:
+  - research.answer.query
+preconditions:
+  - query input is present
+inputs:
+  required:
+    - query
+outputs:
+  required:
+    - evidence
+requires:
+  capabilities:
+    - research.evidence.search
+policy:
+  side_effect: none
+runtime:
+  max_steps: 2
+  max_tool_calls: 1

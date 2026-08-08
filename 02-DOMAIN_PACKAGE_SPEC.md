@@ -22,6 +22,7 @@ agents/<domain>/
 skills/<domain>/
 └── <skill-id>/
     ├── SKILL.md
+    ├── skill.yaml
     └── tests/
 
 capabilities/
@@ -142,35 +143,14 @@ runtime:
 
 ## 6. Domain Skill
 
+`SKILL.md` 的 frontmatter 只保存 Codex 用于触发的 `name` 和 `description`；
+Harness 所需的版本、任务、输入输出、Capability 和 Policy 契约存放在相邻的
+`skill.yaml`，避免产品元数据和运行时契约互相耦合。
+
 ```markdown
 ---
-id: example-domain.example-skill
-name: Example Skill
-version: 1.0.0
-
-domain:
-  id: example-domain
-
-task_types:
-  - domain.task
-
-preconditions: []
-
-inputs:
-  required: []
-
-outputs:
-  required: []
-
-requires:
-  capabilities: []
-
-policy:
-  side_effect: none
-
-runtime:
-  max_steps: 8
-  max_tool_calls: 10
+name: example-skill
+description: Perform the example domain workflow. Use for domain.task requests.
 ---
 
 # Objective
@@ -185,6 +165,25 @@ runtime:
 # Failure Handling
 
 # Completion Criteria
+```
+
+```yaml
+# skill.yaml
+id: example-domain.example-skill
+version: 1.0.0
+task_types: [domain.task]
+preconditions: []
+inputs:
+  required: []
+outputs:
+  required: []
+requires:
+  capabilities: []
+policy:
+  side_effect: none
+runtime:
+  max_steps: 8
+  max_tool_calls: 10
 ```
 
 ## 7. capabilities.yaml
