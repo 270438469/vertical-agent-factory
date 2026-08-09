@@ -1,7 +1,9 @@
 # 全面自测试报告
 
-测试日期：2026-08-09  
-测试分支：`bussiness_type`  
+测试日期：2026-08-09
+
+测试分支：`bussiness_type`
+
 测试基线：`42a2c1c Add no-code agent setup center`
 
 ## 发布结论
