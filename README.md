@@ -2,7 +2,7 @@
 
 一套 **Capability-first（能力优先）** 的垂直领域 Agent 工厂：用共享 Harness 承载运行时、策略、审批、追踪和评测，再通过可版本化的 Domain Pack 安装领域知识、任务、Skill、工作流与输出契约。
 
-[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [无代码配置中心](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/setup) · [无代码配置手册](docs/NO_CODE_SETUP_UI.md) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
+[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [无代码配置中心](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/setup) · [无代码配置手册](docs/NO_CODE_SETUP_UI.md) · [全面自测试报告](docs/SELF_TEST_REPORT.md) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
 
 ## 它解决什么问题
 
