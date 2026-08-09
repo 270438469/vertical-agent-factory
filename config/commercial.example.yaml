@@ -10,6 +10,44 @@ providers:
     api_key_env: ANTHROPIC_API_KEY
   gemini:
     api_key_env: GEMINI_API_KEY
+  # China model providers with public OpenAI-compatible Chat Completions APIs.
+  qwen:
+    api_key_env: DASHSCOPE_API_KEY
+    # Optional. New Model Studio workspaces use a region/workspace-specific URL.
+    base_url_env: DASHSCOPE_BASE_URL
+  deepseek:
+    api_key_env: DEEPSEEK_API_KEY
+  zhipu:
+    api_key_env: ZHIPU_API_KEY
+  moonshot:
+    api_key_env: MOONSHOT_API_KEY
+    base_url_env: MOONSHOT_BASE_URL
+  minimax:
+    api_key_env: MINIMAX_API_KEY
+    base_url_env: MINIMAX_BASE_URL
+  doubao:
+    api_key_env: ARK_API_KEY
+    base_url_env: ARK_BASE_URL
+  hunyuan:
+    api_key_env: HUNYUAN_API_KEY
+  qianfan:
+    api_key_env: QIANFAN_API_KEY
+  stepfun:
+    api_key_env: STEPFUN_API_KEY
+  yi:
+    api_key_env: YI_API_KEY
+  baichuan:
+    api_key_env: BAICHUAN_API_KEY
+  spark:
+    api_key_env: SPARK_API_KEY
+  siliconflow:
+    api_key_env: SILICONFLOW_API_KEY
+  sensenova:
+    api_key_env: SENSENOVA_API_KEY
+  mimo:
+    api_key_env: MIMO_API_KEY
+  longcat:
+    api_key_env: LONGCAT_API_KEY
 
 tenants:
   - id: demo-customer
@@ -24,6 +62,22 @@ tenants:
       - openai
       - anthropic
       - gemini
+      - qwen
+      - deepseek
+      - zhipu
+      - moonshot
+      - minimax
+      - doubao
+      - hunyuan
+      - qianfan
+      - stepfun
+      - yi
+      - baichuan
+      - spark
+      - siliconflow
+      - sensenova
+      - mimo
+      - longcat
     default_provider: local
     allowed_models:
       # Model allowlists are deliberate cost and governance boundaries.
@@ -33,6 +87,24 @@ tenants:
         - claude-sonnet-4-5
       gemini:
         - gemini-2.5-flash
+      # Replace every placeholder with a model/deployment ID enabled in your
+      # own vendor account. Doubao commonly uses an Ark endpoint ID here.
+      qwen: [replace-with-qwen-model-id]
+      deepseek: [replace-with-deepseek-model-id]
+      zhipu: [replace-with-zhipu-model-id]
+      moonshot: [replace-with-kimi-model-id]
+      minimax: [replace-with-minimax-model-id]
+      doubao: [replace-with-ark-endpoint-id]
+      hunyuan: [replace-with-hunyuan-model-id]
+      qianfan: [replace-with-qianfan-model-id]
+      stepfun: [replace-with-stepfun-model-id]
+      yi: [replace-with-yi-model-id]
+      baichuan: [replace-with-baichuan-model-id]
+      spark: [replace-with-spark-model-id]
+      siliconflow: [replace-with-siliconflow-model-id]
+      sensenova: [replace-with-sensenova-model-id]
+      mimo: [replace-with-mimo-model-id]
+      longcat: [replace-with-longcat-model-id]
     default_models:
       openai: gpt-5-mini
       anthropic: claude-sonnet-4-5

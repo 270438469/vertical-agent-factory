@@ -8,7 +8,7 @@ HTTP boundary straightforward to fake in tests.
 import json
 from dataclasses import dataclass
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
 from .errors import RuntimeExecutionError
@@ -208,6 +208,192 @@ class GeminiProvider(BaseModelProvider):
         )
 
 
+CHINA_OPENAI_COMPATIBLE_PROVIDERS = {
+    "qwen": {
+        "name": "Alibaba Cloud Model Studio (Qwen)",
+        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "allowed_hosts": (
+            "dashscope.aliyuncs.com",
+            "dashscope-intl.aliyuncs.com",
+            "dashscope-us.aliyuncs.com",
+            ".maas.aliyuncs.com",
+        ),
+    },
+    "deepseek": {
+        "name": "DeepSeek",
+        "base_url": "https://api.deepseek.com",
+        "allowed_hosts": ("api.deepseek.com",),
+    },
+    "zhipu": {
+        "name": "Zhipu BigModel (GLM)",
+        "base_url": "https://open.bigmodel.cn/api/paas/v4",
+        "allowed_hosts": ("open.bigmodel.cn",),
+    },
+    "moonshot": {
+        "name": "Moonshot AI (Kimi)",
+        "base_url": "https://api.moonshot.cn/v1",
+        "allowed_hosts": ("api.moonshot.cn", "api.moonshot.ai"),
+    },
+    "minimax": {
+        "name": "MiniMax",
+        "base_url": "https://api.minimaxi.com/v1",
+        "allowed_hosts": ("api.minimaxi.com", "api.minimax.io"),
+    },
+    "doubao": {
+        "name": "Volcengine Ark (Doubao)",
+        "base_url": "https://ark.cn-beijing.volces.com/api/v3",
+        "allowed_hosts": ("ark.cn-beijing.volces.com", ".volces.com"),
+    },
+    "hunyuan": {
+        "name": "Tencent Hunyuan",
+        "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
+        "allowed_hosts": ("api.hunyuan.cloud.tencent.com",),
+    },
+    "qianfan": {
+        "name": "Baidu Qianfan",
+        "base_url": "https://qianfan.baidubce.com/v2",
+        "allowed_hosts": ("qianfan.baidubce.com", ".qianfan.baidubce.com"),
+    },
+    "stepfun": {
+        "name": "StepFun",
+        "base_url": "https://api.stepfun.ai/v1",
+        "allowed_hosts": ("api.stepfun.ai",),
+    },
+    "yi": {
+        "name": "01.AI (Yi)",
+        "base_url": "https://api.lingyiwanwu.com/v1",
+        "allowed_hosts": ("api.lingyiwanwu.com",),
+    },
+    "baichuan": {
+        "name": "Baichuan AI",
+        "base_url": "https://api.baichuan-ai.com/v1",
+        "allowed_hosts": ("api.baichuan-ai.com",),
+    },
+    "spark": {
+        "name": "iFLYTEK Spark",
+        "base_url": "https://spark-api-open.xf-yun.com/v1",
+        "allowed_hosts": ("spark-api-open.xf-yun.com",),
+    },
+    "siliconflow": {
+        "name": "SiliconFlow",
+        "base_url": "https://api.siliconflow.cn/v1",
+        "allowed_hosts": ("api.siliconflow.cn",),
+    },
+    "sensenova": {
+        "name": "SenseNova",
+        "base_url": "https://api.sensenova.cn/compatible-mode/v1",
+        "allowed_hosts": ("api.sensenova.cn", ".sensenova.cn"),
+    },
+    "mimo": {
+        "name": "Xiaomi MiMo",
+        "base_url": "https://api.xiaomimimo.com/v1",
+        "allowed_hosts": ("api.xiaomimimo.com",),
+    },
+    "longcat": {
+        "name": "Meituan LongCat",
+        "base_url": "https://api.longcat.chat/openai/v1",
+        "allowed_hosts": ("api.longcat.chat",),
+    },
+}
+
+
+def _host_allowed(host, allowed_hosts):
+    host = (host or "").lower().rstrip(".")
+    for allowed in allowed_hosts:
+        allowed = allowed.lower().rstrip(".")
+        if allowed.startswith("."):
+            if host.endswith(allowed) and host != allowed[1:]:
+                return True
+        elif host == allowed:
+            return True
+    return False
+
+
+class OpenAICompatibleProvider(BaseModelProvider):
+    """Chat Completions adapter for allowlisted Chinese provider endpoints."""
+
+    def __init__(self, provider_id, api_key, base_url=None, transport=None):
+        definition = CHINA_OPENAI_COMPATIBLE_PROVIDERS.get(provider_id)
+        if definition is None:
+            raise ModelProviderError("Unsupported compatible provider: {}".format(provider_id))
+        self.provider_id = provider_id
+        selected_base_url = (base_url or definition["base_url"]).rstrip("/")
+        parsed = urlparse(selected_base_url)
+        try:
+            parsed_port = parsed.port
+        except ValueError:
+            raise ModelProviderError("Provider base URL contains an invalid port")
+        if parsed.scheme != "https" or not _host_allowed(
+            parsed.hostname, definition["allowed_hosts"]
+        ):
+            raise ModelProviderError(
+                "Provider base URL is outside the official host allowlist"
+            )
+        if (
+            parsed.query
+            or parsed.fragment
+            or parsed.username
+            or parsed.password
+            or parsed_port not in (None, 443)
+        ):
+            raise ModelProviderError("Provider base URL contains unsupported components")
+        self.endpoint = (
+            selected_base_url
+            if selected_base_url.endswith("/chat/completions")
+            else selected_base_url + "/chat/completions"
+        )
+        super().__init__(api_key, transport=transport)
+
+    def generate(self, model, prompt, instructions=None, maximum_output_tokens=800):
+        messages = []
+        if instructions:
+            messages.append({"role": "system", "content": instructions})
+        messages.append({"role": "user", "content": prompt})
+        data, headers = self.transport.post(
+            self.endpoint,
+            {
+                "Authorization": "Bearer {}".format(self.api_key),
+                "Content-Type": "application/json",
+            },
+            {
+                "model": model,
+                "messages": messages,
+                "max_tokens": maximum_output_tokens,
+                "stream": False,
+            },
+        )
+        choices = data.get("choices") or []
+        content = (choices[0].get("message") or {}).get("content") if choices else None
+        if isinstance(content, list):
+            text = "\n".join(
+                part.get("text", "")
+                for part in content
+                if isinstance(part, dict) and part.get("text")
+            )
+        else:
+            text = content or ""
+        if not text:
+            raise ModelProviderError(
+                "{} response did not contain output text".format(self.provider_id)
+            )
+        usage = data.get("usage") or {}
+        input_tokens = int(
+            usage.get("prompt_tokens") or usage.get("input_tokens") or 0
+        )
+        output_tokens = int(
+            usage.get("completion_tokens") or usage.get("output_tokens") or 0
+        )
+        return ModelResult(
+            text=text,
+            provider=self.provider_id,
+            model=model,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            total_tokens=int(usage.get("total_tokens") or input_tokens + output_tokens),
+            vendor_request_id=data.get("id") or headers.get("x-request-id", ""),
+        )
+
+
 PROVIDER_TYPES = {
     "openai": OpenAIProvider,
     "anthropic": AnthropicProvider,
@@ -216,15 +402,24 @@ PROVIDER_TYPES = {
 
 
 class ModelGateway(object):
-    def __init__(self, api_keys, transport=None):
+    def __init__(self, api_keys, base_urls=None, transport=None):
         self.api_keys = dict(api_keys or {})
+        self.base_urls = dict(base_urls or {})
         self.transport = transport
 
     def generate(self, provider, model, prompt, instructions=None, maximum_output_tokens=800):
         provider_type = PROVIDER_TYPES.get(provider)
-        if provider_type is None:
+        if provider_type is not None:
+            client = provider_type(self.api_keys.get(provider), transport=self.transport)
+        elif provider in CHINA_OPENAI_COMPATIBLE_PROVIDERS:
+            client = OpenAICompatibleProvider(
+                provider,
+                self.api_keys.get(provider),
+                base_url=self.base_urls.get(provider),
+                transport=self.transport,
+            )
+        else:
             raise ModelProviderError("Unsupported model provider: {}".format(provider))
-        client = provider_type(self.api_keys.get(provider), transport=self.transport)
         return client.generate(
             model,
             prompt,

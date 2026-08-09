@@ -251,6 +251,9 @@ database_path: state/usage.sqlite3
 providers:
   openai:
     api_key_env: OPENAI_API_KEY
+  qwen:
+    api_key_env: DASHSCOPE_API_KEY
+    base_url_env: DASHSCOPE_BASE_URL
 tenants:
   - id: customer-a
     api_key_env: CUSTOMER_KEY
@@ -263,6 +266,7 @@ tenants:
     loaded = load_commercial_config(valid)
     assert loaded.project_root == tmp_path.resolve()
     assert loaded.database_path == (tmp_path / "state" / "usage.sqlite3").resolve()
+    assert loaded.provider_base_url_envs == {"qwen": "DASHSCOPE_BASE_URL"}
 
     invalid = config_dir / "invalid.yaml"
     invalid.write_text(

@@ -6,6 +6,8 @@ from pathlib import Path
 
 import yaml
 
+from ..model_providers import CHINA_OPENAI_COMPATIBLE_PROVIDERS, PROVIDER_TYPES
+
 
 class CommercialConfigError(ValueError):
     pass
@@ -35,11 +37,19 @@ class CommercialConfig:
     database_path: Path
     provider_key_envs: dict
     tenants: list
+    provider_base_url_envs: dict = field(default_factory=dict)
 
     def provider_api_keys(self):
         return {
             provider: os.environ.get(environment_name, "")
             for provider, environment_name in self.provider_key_envs.items()
+        }
+
+    def provider_base_urls(self):
+        return {
+            provider: os.environ.get(environment_name, "")
+            for provider, environment_name in self.provider_base_url_envs.items()
+            if os.environ.get(environment_name)
         }
 
 
@@ -60,10 +70,18 @@ def load_commercial_config(path):
     database_value = data.get("database_path", ".commercial/usage.sqlite3")
     database_path = (project_root / database_value).resolve()
     provider_key_envs = {}
+    provider_base_url_envs = {}
     for provider, provider_data in (data.get("providers") or {}).items():
+        if (
+            provider not in PROVIDER_TYPES
+            and provider not in CHINA_OPENAI_COMPATIBLE_PROVIDERS
+        ):
+            raise CommercialConfigError("Unsupported provider id: {}".format(provider))
         provider_key_envs[provider] = _required(
             provider_data or {}, "api_key_env", "provider {}".format(provider)
         )
+        if (provider_data or {}).get("base_url_env"):
+            provider_base_url_envs[provider] = provider_data["base_url_env"]
 
     tenants = []
     seen = set()
@@ -114,4 +132,5 @@ def load_commercial_config(path):
         database_path=database_path,
         provider_key_envs=provider_key_envs,
         tenants=tenants,
+        provider_base_url_envs=provider_base_url_envs,
     )

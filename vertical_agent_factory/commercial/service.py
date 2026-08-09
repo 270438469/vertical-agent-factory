@@ -62,7 +62,9 @@ class CommercialService(object):
                     )
                 )
         self.usage = usage_store or UsageStore(config.database_path)
-        self.model_gateway = model_gateway or ModelGateway(config.provider_api_keys())
+        self.model_gateway = model_gateway or ModelGateway(
+            config.provider_api_keys(), base_urls=config.provider_base_urls()
+        )
         self.rate_limiter = rate_limiter or MinuteRateLimiter()
 
     def authenticate(self, authorization):

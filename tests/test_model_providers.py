@@ -2,8 +2,11 @@ import pytest
 
 from vertical_agent_factory.model_providers import (
     AnthropicProvider,
+    CHINA_OPENAI_COMPATIBLE_PROVIDERS,
     GeminiProvider,
     ModelProviderError,
+    ModelGateway,
+    OpenAICompatibleProvider,
     OpenAIProvider,
 )
 
@@ -92,3 +95,67 @@ def test_provider_rejects_empty_model_output():
         OpenAIProvider("secret", transport=FakeTransport({"output": []})).generate(
             "approved-model", "prompt"
         )
+
+
+@pytest.mark.parametrize("provider_id", sorted(CHINA_OPENAI_COMPATIBLE_PROVIDERS))
+def test_china_compatible_provider_contract(provider_id):
+    transport = FakeTransport(
+        {
+            "id": "chatcmpl-cn-1",
+            "choices": [
+                {"message": {"role": "assistant", "content": "verified result"}}
+            ],
+            "usage": {
+                "prompt_tokens": 12,
+                "completion_tokens": 5,
+                "total_tokens": 17,
+            },
+        }
+    )
+    gateway = ModelGateway({provider_id: "server-secret"}, transport=transport)
+    result = gateway.generate(
+        provider_id, "tenant-approved-model", "prompt", instructions="system"
+    )
+    assert result.provider == provider_id
+    assert result.text == "verified result"
+    assert result.total_tokens == 17
+    url, headers, payload = transport.calls[0]
+    assert url.endswith("/chat/completions")
+    assert headers["Authorization"] == "Bearer server-secret"
+    assert payload["messages"][0] == {"role": "system", "content": "system"}
+    assert payload["stream"] is False
+
+
+def test_qwen_workspace_base_url_override_is_allowlisted():
+    transport = FakeTransport(
+        {
+            "choices": [{"message": {"content": "workspace result"}}],
+            "usage": {},
+        }
+    )
+    gateway = ModelGateway(
+        {"qwen": "secret"},
+        base_urls={
+            "qwen": "https://workspace-id.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+        },
+        transport=transport,
+    )
+    assert gateway.generate("qwen", "approved-model", "prompt").text == "workspace result"
+    assert transport.calls[0][0].startswith(
+        "https://workspace-id.cn-beijing.maas.aliyuncs.com/"
+    )
+
+
+@pytest.mark.parametrize(
+    "unsafe_url",
+    [
+        "http://api.deepseek.com",
+        "https://api.deepseek.com.attacker.example/v1",
+        "https://user:password@api.deepseek.com/v1",
+        "https://api.deepseek.com:444/v1",
+        "https://attacker.example/v1",
+    ],
+)
+def test_provider_base_url_override_rejects_ssrf(unsafe_url):
+    with pytest.raises(ModelProviderError, match="allowlist|unsupported"):
+        OpenAICompatibleProvider("deepseek", "secret", base_url=unsafe_url)

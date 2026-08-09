@@ -29,14 +29,14 @@ flowchart LR
 
 - 可执行 Python Harness：包加载、校验、能力解析、策略、审批、工作流、Trace 和 Eval。
 - 完整 `research` 示例 Domain Pack：2 类任务、4 个 Skill、4 项 Capability、2 条工作流。
-- 30 个 Golden Evals、14 个核心系统测试与 16 个商业 API/Provider 测试。
+- 30 个 Golden Evals、14 个核心系统测试与 38 个商业 API/Provider 测试。
 - 交互式 Web UI：演示成功查询、证据不足、Provider 故障、审批拦截和批准写入。
-- 多租户商业 REST API：API Key、限流、配额、计量、幂等和官方模型厂商切换。
+- 多租户商业 REST API：API Key、限流、配额、计量、幂等，以及 16 个中国模型 Provider 和 3 个国际厂商适配。
 - 领域包规范、模板目录、维护流程与验收清单。
 
 ## 商业 API
 
-外部客户可以通过统一的 `/v1/agent/runs` 调用 Agent，服务端再按租户 allowlist 选择 `local`、`openai`、`anthropic` 或 `gemini`。客户不会获得厂商密钥，也不能在请求中自行批准写操作。
+外部客户可以通过统一的 `/v1/agent/runs` 调用 Agent，服务端再按租户 allowlist 选择本地、OpenAI、Anthropic、Gemini，或 Qwen、DeepSeek、GLM、Kimi、MiniMax、豆包、混元、千帆等 16 个中国 Provider。客户不会获得厂商密钥，也不能在请求中自行批准写操作。
 
 ```powershell
 python -m pip install -e ".[api]"
@@ -106,7 +106,7 @@ pnpm run lint
 pnpm test
 ```
 
-当前基线：30 个 Python 测试、30/30 Golden Evals、2 个服务端渲染 HTML 测试，生产构建与 lint 通过。
+当前基线：52 个 Python 测试、30/30 Golden Evals、2 个服务端渲染 HTML 测试，生产构建与 lint 通过。
 
 ## 项目结构
 
