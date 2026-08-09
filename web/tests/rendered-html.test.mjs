@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-async function render() {
+async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
-  return worker.fetch(new Request("http://localhost/", { headers: { accept: "text/html" } }), {
+  return worker.fetch(new Request(`http://localhost${path}`, { headers: { accept: "text/html" } }), {
     ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) },
   }, { waitUntil() {}, passThroughOnException() {} });
 }
@@ -29,4 +29,16 @@ test("ships essential accessible controls", async () => {
   assert.match(html, /aria-label="运行场景"/);
   assert.match(html, /aria-live="polite"/);
   assert.match(html, /<button/);
+});
+
+test("renders the no-code agent setup wizard", async () => {
+  const response = await render("/setup");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /不写代码/);
+  assert.match(html, /配置 Agent/);
+  assert.match(html, /客户 \/ 项目标识/);
+  assert.match(html, /NO-CODE AGENT SETUP/);
+  assert.match(html, /SETUP PROGRESS/);
+  assert.doesNotMatch(html, /OPENAI_API_KEY=[^<&\s]+/);
 });

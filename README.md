@@ -2,7 +2,7 @@
 
 一套 **Capability-first（能力优先）** 的垂直领域 Agent 工厂：用共享 Harness 承载运行时、策略、审批、追踪和评测，再通过可版本化的 Domain Pack 安装领域知识、任务、Skill、工作流与输出契约。
 
-[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
+[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [无代码配置中心](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/setup) · [无代码配置手册](docs/NO_CODE_SETUP_UI.md) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
 
 ## 它解决什么问题
 
@@ -29,8 +29,8 @@ flowchart LR
 
 - 可执行 Python Harness：包加载、校验、能力解析、策略、审批、工作流、Trace 和 Eval。
 - 完整 `research` 示例 Domain Pack：2 类任务、4 个 Skill、4 项 Capability、2 条工作流。
-- 30 个 Golden Evals、14 个核心系统测试与 42 个商业 API/Provider 测试。
-- 交互式 Web UI：演示成功查询、证据不足、Provider 故障、审批拦截和批准写入。
+- 30 个 Golden Evals、14 个核心系统测试与 46 个商业 API/Provider 测试。
+- 交互式 Web UI：演示运行链，并提供面向非技术用户的五步 Agent 配置向导。
 - 多租户商业 REST API：API Key、限流、配额、计量、幂等，以及 16 个中国模型 Provider 和 3 个国际厂商适配。
 - 领域包规范、模板目录、维护流程与验收清单。
 
@@ -45,7 +45,7 @@ $env:VAF_API_KEY_DEMO = "replace-with-a-long-random-customer-key"
 vertical-agent-api
 ```
 
-第一次部署请按[商业 API 逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md)操作；接口原理与生产要求见[商业 API 接入与部署](docs/COMMERCIAL_API.md)；当前厂商模型档位、例外和更新流程见[模型前三档配置](docs/MODEL_TIERS.md)。
+非技术用户可直接使用[无代码配置中心](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/setup)并按[无代码配置手册](docs/NO_CODE_SETUP_UI.md)完成；手工部署请按[商业 API 逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md)操作。接口原理与生产要求见[商业 API 接入与部署](docs/COMMERCIAL_API.md)；当前厂商模型档位、例外和更新流程见[模型前三档配置](docs/MODEL_TIERS.md)。
 
 ## 5 分钟快速开始
 
@@ -91,7 +91,7 @@ pnpm install
 pnpm run dev
 ```
 
-打开终端显示的本地地址，或直接访问[在线版本](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site)。UI 是架构讲解与场景模拟器，不会触发真实外部写操作。
+打开终端显示的本地地址，或直接访问[在线版本](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site)。系统地图用于架构讲解与场景模拟；`/setup` 配置中心只有在用户明确连接本机配置服务并点击应用时，才会把配置写入本机。
 
 ## 自测试
 
@@ -106,7 +106,7 @@ pnpm run lint
 pnpm test
 ```
 
-当前基线：56 个 Python 测试、30/30 Golden Evals、2 个服务端渲染 HTML 测试，生产构建与 lint 通过。
+当前基线：60 个 Python 测试、30/30 Golden Evals、3 个服务端渲染 HTML 测试，生产构建与 lint 通过。
 
 ## 项目结构
 
@@ -129,6 +129,7 @@ config/                   商业 API 配置示例
 ## 从这里继续
 
 - 第一次运行：阅读[详细使用手册](docs/USAGE.md)。
+- 不写代码配置 Agent：使用[无代码配置中心](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/setup)并阅读[无代码配置手册](docs/NO_CODE_SETUP_UI.md)。
 - 对外提供服务：阅读[商业 API 接入与部署](docs/COMMERCIAL_API.md)。
 - 理解执行链：阅读[架构说明](docs/ARCHITECTURE.md)。
 - 创建新垂直领域：阅读[Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)。

@@ -11,6 +11,11 @@ from vertical_agent_factory.commercial.config import (
     load_commercial_config,
 )
 from vertical_agent_factory.commercial.service import CommercialService
+from vertical_agent_factory.commercial.setup import (
+    SetupValidationError,
+    convert_setup,
+    load_local_environment,
+)
 from vertical_agent_factory.model_providers import ModelResult
 
 
@@ -352,3 +357,84 @@ def test_service_rejects_short_customer_keys(tmp_path, monkeypatch):
     )
     with pytest.raises(ValueError, match="at least 32"):
         CommercialService(config)
+
+
+def setup_payload():
+    return {
+        "tenant_id": "demo-customer",
+        "customer_api_key": "customer-key-that-is-longer-than-32-bytes",
+        "allowed_tasks": ["research.answer.query"],
+        "providers": [
+            {
+                "id": "deepseek",
+                "api_key": "provider-secret-value",
+                "base_url": "",
+                "models": ["deepseek-v4-pro", "deepseek-v4-flash"],
+            }
+        ],
+        "default_provider": "deepseek",
+        "rate_limit_per_minute": 45,
+        "monthly_request_quota": 9000,
+    }
+
+
+def test_setup_converter_separates_yaml_from_secrets():
+    converted = convert_setup(setup_payload(), require_secrets=True)
+    assert "provider-secret-value" not in converted["yaml"]
+    assert "customer-key-that-is-longer-than-32-bytes" not in converted["yaml"]
+    assert converted["config"]["providers"]["deepseek"]["api_key_env"] == "DEEPSEEK_API_KEY"
+    assert converted["config"]["tenants"][0]["default_models"]["deepseek"] == "deepseek-v4-pro"
+    assert converted["secrets"]["DEEPSEEK_API_KEY"] == "provider-secret-value"
+
+
+def test_setup_converter_rejects_placeholder_models():
+    payload = setup_payload()
+    payload["providers"][0] = {
+        "id": "siliconflow",
+        "api_key": "provider-secret-value",
+        "models": ["replace-with-siliconflow-top1-model-id"],
+    }
+    with pytest.raises(SetupValidationError, match="占位模型"):
+        convert_setup(payload, require_secrets=True)
+
+
+def test_no_code_setup_api_previews_and_applies_local_files(tmp_path, monkeypatch):
+    setup_key = "setup-administrator-key-longer-than-32-bytes"
+    config_path = tmp_path / "config" / "commercial.yaml"
+    environment_path = tmp_path / ".env"
+    monkeypatch.setenv("VAF_SETUP_ADMIN_KEY", setup_key)
+    monkeypatch.setenv("VAF_SETUP_ENV_FILE", str(environment_path))
+    client = TestClient(create_app(config_path=config_path))
+    headers = {"Authorization": "Bearer {}".format(setup_key)}
+
+    assert client.get("/v1/health").json()["status"] == "setup_required"
+    assert client.get("/v1/setup/catalog").status_code == 200
+    assert client.get("/v1/setup/status", headers=headers).status_code == 200
+
+    preview = client.post("/v1/setup/preview", headers=headers, json=setup_payload())
+    assert preview.status_code == 200
+    assert "provider-secret-value" not in preview.text
+    assert "api_key_env: DEEPSEEK_API_KEY" in preview.json()["yaml"]
+
+    applied = client.post("/v1/setup/apply", headers=headers, json=setup_payload())
+    assert applied.status_code == 200
+    assert applied.json()["restart_required"] is True
+    assert "provider-secret-value" not in config_path.read_text(encoding="utf-8")
+    assert "DEEPSEEK_API_KEY=provider-secret-value" in environment_path.read_text(encoding="utf-8")
+    loaded = load_commercial_config(config_path)
+    assert loaded.tenants[0].tenant_id == "demo-customer"
+
+    monkeypatch.delenv("VAF_API_KEY_DEMO_CUSTOMER", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.delenv("VAF_SETUP_ADMIN_KEY", raising=False)
+    load_local_environment(environment_path)
+    restarted = TestClient(create_app(config_path=config_path))
+    assert restarted.get("/v1/health").json()["status"] == "ok"
+
+
+def test_setup_api_is_hidden_without_an_admin_key(tmp_path, monkeypatch):
+    monkeypatch.delenv("VAF_SETUP_ADMIN_KEY", raising=False)
+    service, _ = make_service(tmp_path, monkeypatch)
+    client = TestClient(create_app(service=service))
+    response = client.get("/v1/setup/status")
+    assert response.status_code == 404

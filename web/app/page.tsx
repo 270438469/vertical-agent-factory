@@ -142,7 +142,7 @@ export default function Home() {
       <header className="topbar">
         <a className="brand" href="#top" aria-label="Vertical Agent Factory 首页"><span>VAF</span><b>Vertical Agent Factory</b></a>
         <nav aria-label="页面导航">
-          <a href="#runtime">运行链</a><a href="#build">搭建</a><a href="#tests">自测试</a>
+          <a href="/setup">配置中心</a><a href="#runtime">运行链</a><a href="#build">搭建</a><a href="#tests">自测试</a>
         </nav>
         <a className="repo-link" href="https://github.com/270438469/vertical-agent-factory" target="_blank" rel="noreferrer">GitHub ↗</a>
       </header>
@@ -152,7 +152,7 @@ export default function Home() {
         <h1>把 Agent 系统<br /><em>拆开给你看。</em></h1>
         <p className="hero-copy">一套可运行、可审计、可替换 Provider 的垂直 Agent 工厂。这里不是架构幻灯片——每个节点都对应仓库里的真实契约。</p>
         <div className="hero-actions">
-          <a className="button primary" href="#runtime">进入运行实验室 <span>↓</span></a>
+          <a className="button primary" href="/setup">无代码配置 Agent <span>→</span></a>
           <button className="button ghost" onClick={copyCommand}>{copied ? "已复制命令 ✓" : "复制快速运行命令"}</button>
         </div>
         <div className="score-strip" aria-label="系统验证摘要">
