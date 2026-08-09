@@ -106,7 +106,7 @@ pnpm run lint
 pnpm test
 ```
 
-`pnpm test` 会先执行生产构建，再运行服务端渲染 HTML 测试。当前基线是 52 个 Python 测试、30/30 Golden Evals 和 2 个 HTML 测试。
+`pnpm test` 会先执行生产构建，再运行服务端渲染 HTML 测试。当前基线是 56 个 Python 测试、30/30 Golden Evals 和 2 个 HTML 测试。
 
 ## 7. 运行 Web UI
 

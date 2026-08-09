@@ -2,7 +2,7 @@
 
 一套 **Capability-first（能力优先）** 的垂直领域 Agent 工厂：用共享 Harness 承载运行时、策略、审批、追踪和评测，再通过可版本化的 Domain Pack 安装领域知识、任务、Skill、工作流与输出契约。
 
-[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
+[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
 
 ## 它解决什么问题
 
@@ -29,7 +29,7 @@ flowchart LR
 
 - 可执行 Python Harness：包加载、校验、能力解析、策略、审批、工作流、Trace 和 Eval。
 - 完整 `research` 示例 Domain Pack：2 类任务、4 个 Skill、4 项 Capability、2 条工作流。
-- 30 个 Golden Evals、14 个核心系统测试与 38 个商业 API/Provider 测试。
+- 30 个 Golden Evals、14 个核心系统测试与 42 个商业 API/Provider 测试。
 - 交互式 Web UI：演示成功查询、证据不足、Provider 故障、审批拦截和批准写入。
 - 多租户商业 REST API：API Key、限流、配额、计量、幂等，以及 16 个中国模型 Provider 和 3 个国际厂商适配。
 - 领域包规范、模板目录、维护流程与验收清单。
@@ -45,7 +45,7 @@ $env:VAF_API_KEY_DEMO = "replace-with-a-long-random-customer-key"
 vertical-agent-api
 ```
 
-完整配置、调用和生产部署要求见[商业 API 接入与部署](docs/COMMERCIAL_API.md)。
+完整配置、调用和生产部署要求见[商业 API 接入与部署](docs/COMMERCIAL_API.md)；当前厂商模型档位、例外和更新流程见[模型前三档配置](docs/MODEL_TIERS.md)。
 
 ## 5 分钟快速开始
 
@@ -106,7 +106,7 @@ pnpm run lint
 pnpm test
 ```
 
-当前基线：52 个 Python 测试、30/30 Golden Evals、2 个服务端渲染 HTML 测试，生产构建与 lint 通过。
+当前基线：56 个 Python 测试、30/30 Golden Evals、2 个服务端渲染 HTML 测试，生产构建与 lint 通过。
 
 ## 项目结构
 

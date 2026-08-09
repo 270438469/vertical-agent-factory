@@ -260,6 +260,10 @@ tenants:
     allowed_domains: [research]
     allowed_tasks: [research.answer.query]
     allowed_providers: [local, openai]
+    allowed_models:
+      openai: [tier-1, tier-2, tier-3]
+    default_models:
+      openai: tier-1
 """,
         encoding="utf-8",
     )
@@ -278,6 +282,57 @@ tenants:
     )
     with pytest.raises(CommercialConfigError):
         load_commercial_config(invalid)
+
+
+def test_commercial_example_uses_at_most_three_ordered_model_tiers():
+    config_path = Path(__file__).parents[1] / "config" / "commercial.example.yaml"
+    loaded = load_commercial_config(config_path)
+    tenant = loaded.tenants[0]
+
+    for provider in tenant.allowed_providers:
+        if provider == "local":
+            continue
+        models = tenant.allowed_models[provider]
+        assert 1 <= len(models) <= 3
+        assert len(models) == len(set(models))
+        assert tenant.default_models[provider] == models[0]
+
+
+@pytest.mark.parametrize(
+    "models, default_model, error",
+    [
+        (["one", "two", "three", "four"], "one", "at most three"),
+        (["one", "one"], "one", "duplicate"),
+        (["one", "two"], "two", "first tier"),
+    ],
+)
+def test_config_rejects_invalid_model_tiers(
+    tmp_path, models, default_model, error
+):
+    config_path = tmp_path / "commercial.yaml"
+    rendered_models = ", ".join(models)
+    config_path.write_text(
+        """
+providers:
+  openai:
+    api_key_env: OPENAI_API_KEY
+tenants:
+  - id: customer-a
+    api_key_env: CUSTOMER_KEY
+    allowed_domains: [research]
+    allowed_tasks: [research.answer.query]
+    allowed_providers: [openai]
+    default_provider: openai
+    allowed_models:
+      openai: [{models}]
+    default_models:
+      openai: {default_model}
+""".format(models=rendered_models, default_model=default_model),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(CommercialConfigError, match=error):
+        load_commercial_config(config_path)
 
 
 def test_service_rejects_short_customer_keys(tmp_path, monkeypatch):

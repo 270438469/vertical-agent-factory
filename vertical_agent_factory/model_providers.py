@@ -271,8 +271,11 @@ CHINA_OPENAI_COMPATIBLE_PROVIDERS = {
     },
     "spark": {
         "name": "iFLYTEK Spark",
-        "base_url": "https://spark-api-open.xf-yun.com/v1",
-        "allowed_hosts": ("spark-api-open.xf-yun.com",),
+        "base_url": "https://maas-token-api.cn-huabei-1.xf-yun.com/v2",
+        "allowed_hosts": (
+            "maas-token-api.cn-huabei-1.xf-yun.com",
+            "spark-api-open.xf-yun.com",
+        ),
     },
     "siliconflow": {
         "name": "SiliconFlow",

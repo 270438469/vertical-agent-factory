@@ -92,6 +92,8 @@ def load_commercial_config(path):
         seen.add(tenant_id)
         allowed_providers = list(raw.get("allowed_providers") or ["local"])
         default_provider = raw.get("default_provider", "local")
+        allowed_models = dict(raw.get("allowed_models") or {})
+        default_models = dict(raw.get("default_models") or {})
         if default_provider not in allowed_providers:
             raise CommercialConfigError(
                 "Tenant {} default_provider is not allowed".format(tenant_id)
@@ -107,8 +109,8 @@ def load_commercial_config(path):
             ),
             allowed_providers=allowed_providers,
             default_provider=default_provider,
-            allowed_models=dict(raw.get("allowed_models") or {}),
-            default_models=dict(raw.get("default_models") or {}),
+            allowed_models=allowed_models,
+            default_models=default_models,
             approved_capabilities=list(raw.get("approved_capabilities") or []),
             rate_limit_per_minute=int(raw.get("rate_limit_per_minute", 60)),
             monthly_request_quota=int(raw.get("monthly_request_quota", 10000)),
@@ -121,6 +123,39 @@ def load_commercial_config(path):
             if provider != "local" and provider not in provider_key_envs:
                 raise CommercialConfigError(
                     "Tenant {} references unconfigured provider {}".format(
+                        tenant_id, provider
+                    )
+                )
+            if provider == "local":
+                continue
+            models = tenant.allowed_models.get(provider)
+            if not isinstance(models, list) or not models:
+                raise CommercialConfigError(
+                    "Tenant {} provider {} requires allowed_models".format(
+                        tenant_id, provider
+                    )
+                )
+            if len(models) > 3:
+                raise CommercialConfigError(
+                    "Tenant {} provider {} allows at most three model tiers".format(
+                        tenant_id, provider
+                    )
+                )
+            if any(not isinstance(model, str) or not model.strip() for model in models):
+                raise CommercialConfigError(
+                    "Tenant {} provider {} model ids must be non-empty strings".format(
+                        tenant_id, provider
+                    )
+                )
+            if len(models) != len(set(models)):
+                raise CommercialConfigError(
+                    "Tenant {} provider {} contains duplicate models".format(
+                        tenant_id, provider
+                    )
+                )
+            if tenant.default_models.get(provider) != models[0]:
+                raise CommercialConfigError(
+                    "Tenant {} provider {} default_model must be the first tier".format(
                         tenant_id, provider
                     )
                 )

@@ -80,35 +80,108 @@ tenants:
       - longcat
     default_provider: local
     allowed_models:
-      # Model allowlists are deliberate cost and governance boundaries.
+      # Catalog locked on 2026-08-09. Models are ordered from highest
+      # capability to the fastest/lowest-cost production tier. Keep at most
+      # three current text/chat models per provider; the first is the default.
       openai:
-        - gpt-5-mini
+        - gpt-5.6-sol
+        - gpt-5.6-terra
+        - gpt-5.6-luna
       anthropic:
-        - claude-sonnet-4-5
+        - claude-fable-5
+        - claude-opus-5
+        - claude-sonnet-5
       gemini:
-        - gemini-2.5-flash
-      # Replace every placeholder with a model/deployment ID enabled in your
-      # own vendor account. Doubao commonly uses an Ark endpoint ID here.
-      qwen: [replace-with-qwen-model-id]
-      deepseek: [replace-with-deepseek-model-id]
-      zhipu: [replace-with-zhipu-model-id]
-      moonshot: [replace-with-kimi-model-id]
-      minimax: [replace-with-minimax-model-id]
-      doubao: [replace-with-ark-endpoint-id]
-      hunyuan: [replace-with-hunyuan-model-id]
-      qianfan: [replace-with-qianfan-model-id]
-      stepfun: [replace-with-stepfun-model-id]
-      yi: [replace-with-yi-model-id]
-      baichuan: [replace-with-baichuan-model-id]
-      spark: [replace-with-spark-model-id]
-      siliconflow: [replace-with-siliconflow-model-id]
-      sensenova: [replace-with-sensenova-model-id]
-      mimo: [replace-with-mimo-model-id]
-      longcat: [replace-with-longcat-model-id]
+        - gemini-3.5-flash
+        - gemini-3.6-flash
+        - gemini-3.5-flash-lite
+      qwen:
+        - qwen3.7-max
+        - qwen3.7-plus
+        - qwen3.6-flash
+      # DeepSeek currently publishes only two production chat model IDs.
+      deepseek:
+        - deepseek-v4-pro
+        - deepseek-v4-flash
+      zhipu:
+        - glm-5.2
+        - glm-5.1
+        - glm-5
+      moonshot:
+        - kimi-k3
+        - kimi-k2.6
+        - kimi-k2.5
+      minimax:
+        - MiniMax-M3
+        - MiniMax-M2.7
+        - MiniMax-M2.7-highspeed
+      # Some Ark accounts require endpoint IDs instead of these public aliases.
+      doubao:
+        - doubao-seed-evolving
+        - doubao-seed-2.1-pro
+        - doubao-seed-2.1-turbo
+      hunyuan:
+        - hunyuan-a13b
+        - hunyuan-turbos-latest
+        - hunyuan-lite
+      qianfan:
+        - ernie-5.1
+        - ernie-5.0
+        - ernie-4.5-turbo-128k
+      stepfun:
+        - step-3.5-flash
+        - step-3
+        - step-2-mini
+      # Yi currently lists only one general text model on its public catalog.
+      yi:
+        - yi-lightning
+      baichuan:
+        - Baichuan4-Turbo
+        - Baichuan4
+        - Baichuan4-Air
+      # These IDs use iFLYTEK Astron Token Plan's OpenAI-compatible endpoint.
+      spark:
+        - xsparkx2agent
+        - xsparkx2
+        - xsparkx2flash
+      # SiliconFlow is an aggregator. Replace these slots with the top three
+      # text models actually enabled in the tenant's current model marketplace.
+      siliconflow:
+        - replace-with-siliconflow-top1-model-id
+        - replace-with-siliconflow-top2-model-id
+        - replace-with-siliconflow-top3-model-id
+      # SenseNova returns account-specific IDs from its model-list API.
+      sensenova:
+        - replace-with-sensenova-v6.5-pro-model-id
+        - replace-with-sensenova-v6.5-turbo-model-id
+        - replace-with-sensenova-v6-reasoner-model-id
+      # MiMo currently publishes only two general text model IDs.
+      mimo:
+        - mimo-v2.5-pro
+        - mimo-v2.5
+      # LongCat currently publishes one production text model ID.
+      longcat:
+        - LongCat-2.0
     default_models:
-      openai: gpt-5-mini
-      anthropic: claude-sonnet-4-5
-      gemini: gemini-2.5-flash
+      openai: gpt-5.6-sol
+      anthropic: claude-fable-5
+      gemini: gemini-3.5-flash
+      qwen: qwen3.7-max
+      deepseek: deepseek-v4-pro
+      zhipu: glm-5.2
+      moonshot: kimi-k3
+      minimax: MiniMax-M3
+      doubao: doubao-seed-evolving
+      hunyuan: hunyuan-a13b
+      qianfan: ernie-5.1
+      stepfun: step-3.5-flash
+      yi: yi-lightning
+      baichuan: Baichuan4-Turbo
+      spark: xsparkx2agent
+      siliconflow: replace-with-siliconflow-top1-model-id
+      sensenova: replace-with-sensenova-v6.5-pro-model-id
+      mimo: mimo-v2.5-pro
+      longcat: LongCat-2.0
     # External callers cannot send approvals. Only trusted server-side config can
     # pre-approve a capability. Keep this empty for real write operations.
     approved_capabilities: []

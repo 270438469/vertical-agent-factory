@@ -69,15 +69,15 @@ tenants:
     allowed_providers: [local, openai]
     default_provider: local
     allowed_models:
-      openai: [gpt-5-mini]
+      openai: [gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna]
     default_models:
-      openai: gpt-5-mini
+      openai: gpt-5.6-sol
     approved_capabilities: []
     rate_limit_per_minute: 60
     monthly_request_quota: 10000
 ```
 
-模型名称只是租户 allowlist，应根据已经开通的厂商账户和成本策略维护。删除某个 Provider 或 Model 后，客户即使在请求里指定它也会收到 `403`。
+模型名称只是租户 allowlist，应根据已经开通的厂商账户和成本策略维护。删除某个 Provider 或 Model 后，客户即使在请求里指定它也会收到 `403`。示例配置已按“能力、均衡、高速/低成本”保留每家厂商最多三个当前文本模型，完整目录、例外和月度更新办法见[模型前三档配置](MODEL_TIERS.md)。
 
 `approved_capabilities` 默认必须为空。真实发布、付款、删改等操作应连接独立审批服务，不建议通过静态配置长期预批准。
 
@@ -100,15 +100,15 @@ tenants:
 | `stepfun` | 阶跃星辰 StepFun | `https://api.stepfun.ai/v1` | `STEPFUN_API_KEY` | [API 文档](https://platform.stepfun.ai/docs) |
 | `yi` | 零一万物 / Yi | `https://api.lingyiwanwu.com/v1` | `YI_API_KEY` | [开放平台文档](https://platform.lingyiwanwu.com/docs) |
 | `baichuan` | 百川智能 | `https://api.baichuan-ai.com/v1` | `BAICHUAN_API_KEY` | [开放平台文档](https://platform.baichuan-ai.com/docs) |
-| `spark` | 科大讯飞星火 | `https://spark-api-open.xf-yun.com/v1` | `SPARK_API_KEY` | [星火 API 平台](https://xinghuo.xfyun.cn/sparkapi)；使用兼容接口要求的 API Password |
+| `spark` | 科大讯飞星火 | `https://maas-token-api.cn-huabei-1.xf-yun.com/v2` | `SPARK_API_KEY` | [星辰 Token Plan](https://www.xfyun.cn/doc/spark/TokenPlan.html)；使用套餐专属 API Key，支持 X2 Agent、X2、X2 Flash 三档 |
 | `siliconflow` | SiliconFlow | `https://api.siliconflow.cn/v1` | `SILICONFLOW_API_KEY` | [Chat Completions 文档](https://docs.siliconflow.cn/cn/api-reference/chat-completions/chat-completions)；模型 ID 常带组织前缀 |
 | `sensenova` | 商汤日日新 SenseNova | `https://api.sensenova.cn/compatible-mode/v1` | `SENSENOVA_API_KEY` | [开放平台](https://platform.sensenova.cn/) |
 | `mimo` | 小米 MiMo | `https://api.xiaomimimo.com/v1` | `MIMO_API_KEY` | [开放平台文档](https://platform.xiaomimimo.com/#/docs) |
 | `longcat` | 美团 LongCat | `https://api.longcat.chat/openai/v1` | `LONGCAT_API_KEY` | [开放平台文档](https://longcat.chat/platform/docs) |
 
-### 3.1 为什么模型名不写死
+### 3.1 模型目录为什么需要定期更新
 
-厂商会持续发布、下线或重定向模型，有些平台还使用账户专属部署 ID。系统只内置稳定的协议和官方主机，模型必须放进租户 `allowed_models`：
+示例配置已锁定 2026-08-09 的官方模型目录，但厂商仍会持续发布、下线或重定向模型，有些平台还使用账户专属部署 ID。生产配置必须定期复核，并把确认可用的最多三档模型放进租户 `allowed_models`：
 
 ```yaml
 providers:
@@ -122,10 +122,10 @@ tenants:
     # 其余租户字段省略
     allowed_providers: [local, deepseek, doubao]
     allowed_models:
-      deepseek: [replace-with-enabled-deepseek-model-id]
-      doubao: [replace-with-ark-endpoint-id]
+      deepseek: [deepseek-v4-pro, deepseek-v4-flash]
+      doubao: [doubao-seed-evolving, doubao-seed-2.1-pro, doubao-seed-2.1-turbo]
     default_models:
-      deepseek: replace-with-enabled-deepseek-model-id
+      deepseek: deepseek-v4-pro
 ```
 
 外部请求同时受到 Provider 与 Model 两层 allowlist 约束。即使服务端配置了厂商密钥，租户未获得该 Provider 或 Model 权限时仍返回 `403`。
@@ -150,7 +150,7 @@ $env:DASHSCOPE_BASE_URL = "https://WORKSPACE_ID.cn-beijing.maas.aliyuncs.com/com
   "task": "research.answer.query",
   "input": {"query": "shared Harness"},
   "provider": "deepseek",
-  "model": "replace-with-tenant-approved-model-id"
+  "model": "deepseek-v4-pro"
 }
 ```
 
@@ -200,7 +200,7 @@ Invoke-RestMethod -Method Post `
   "task": "research.answer.query",
   "input": {"query": "shared Harness"},
   "provider": "openai",
-  "model": "gpt-5-mini"
+  "model": "gpt-5.6-sol"
 }
 ```
 
