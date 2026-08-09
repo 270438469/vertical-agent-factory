@@ -2,6 +2,8 @@
 
 商业 API 将内部 Agent Runtime 包装成一个稳定的多租户 REST 接口。外部客户只持有本系统签发的 API Key，不接触模型厂商密钥；服务端根据租户 allowlist 选择本地实现、国际模型 API 或中国模型厂商 API。
 
+如果是第一次部署，请先按[商业 API 逐步配置手册](COMMERCIAL_SETUP_STEP_BY_STEP.md)完成环境、租户、密钥、模型、启动和验收配置。
+
 ```mermaid
 flowchart LR
     C["客户系统"] -->|"Bearer API Key"| G["Commercial API Gateway"]

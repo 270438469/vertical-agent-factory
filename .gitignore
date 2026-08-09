@@ -1,6 +1,7 @@
 .runs/
 .commercial/
 .env
+config/commercial.yaml
 .venv*/
 __pycache__/
 .pytest_cache/

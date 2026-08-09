@@ -6,6 +6,7 @@
 __pycache__
 *.pyc
 .env
+config/commercial.yaml
 .venv*
 web/node_modules
 web/.next

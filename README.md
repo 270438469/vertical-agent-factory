@@ -2,7 +2,7 @@
 
 一套 **Capability-first（能力优先）** 的垂直领域 Agent 工厂：用共享 Harness 承载运行时、策略、审批、追踪和评测，再通过可版本化的 Domain Pack 安装领域知识、任务、Skill、工作流与输出契约。
 
-[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
+[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
 
 ## 它解决什么问题
 
@@ -45,7 +45,7 @@ $env:VAF_API_KEY_DEMO = "replace-with-a-long-random-customer-key"
 vertical-agent-api
 ```
 
-完整配置、调用和生产部署要求见[商业 API 接入与部署](docs/COMMERCIAL_API.md)；当前厂商模型档位、例外和更新流程见[模型前三档配置](docs/MODEL_TIERS.md)。
+第一次部署请按[商业 API 逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md)操作；接口原理与生产要求见[商业 API 接入与部署](docs/COMMERCIAL_API.md)；当前厂商模型档位、例外和更新流程见[模型前三档配置](docs/MODEL_TIERS.md)。
 
 ## 5 分钟快速开始
 
