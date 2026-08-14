@@ -1,0 +1,194 @@
+# Copy to config/commercial.yaml. Never place real API keys in this file.
+project_root: ..
+database_path: .commercial/usage.sqlite3
+
+# Provider credentials are read only from environment variables.
+providers:
+  openai:
+    api_key_env: OPENAI_API_KEY
+  anthropic:
+    api_key_env: ANTHROPIC_API_KEY
+  gemini:
+    api_key_env: GEMINI_API_KEY
+  # China model providers with public OpenAI-compatible Chat Completions APIs.
+  qwen:
+    api_key_env: DASHSCOPE_API_KEY
+    # Optional. New Model Studio workspaces use a region/workspace-specific URL.
+    base_url_env: DASHSCOPE_BASE_URL
+  deepseek:
+    api_key_env: DEEPSEEK_API_KEY
+  zhipu:
+    api_key_env: ZHIPU_API_KEY
+  moonshot:
+    api_key_env: MOONSHOT_API_KEY
+    base_url_env: MOONSHOT_BASE_URL
+  minimax:
+    api_key_env: MINIMAX_API_KEY
+    base_url_env: MINIMAX_BASE_URL
+  doubao:
+    api_key_env: ARK_API_KEY
+    base_url_env: ARK_BASE_URL
+  hunyuan:
+    api_key_env: HUNYUAN_API_KEY
+  qianfan:
+    api_key_env: QIANFAN_API_KEY
+  stepfun:
+    api_key_env: STEPFUN_API_KEY
+  yi:
+    api_key_env: YI_API_KEY
+  baichuan:
+    api_key_env: BAICHUAN_API_KEY
+  spark:
+    api_key_env: SPARK_API_KEY
+  siliconflow:
+    api_key_env: SILICONFLOW_API_KEY
+  sensenova:
+    api_key_env: SENSENOVA_API_KEY
+  mimo:
+    api_key_env: MIMO_API_KEY
+  longcat:
+    api_key_env: LONGCAT_API_KEY
+
+tenants:
+  - id: demo-customer
+    api_key_env: VAF_API_KEY_DEMO
+    allowed_domains:
+      - research
+      - finance
+    allowed_tasks:
+      - research.answer.query
+      - research.report.publish
+      - finance.macro.analyze
+      - finance.a_share.analyze
+      - finance.us_stock.analyze
+      - finance.briefing.publish
+    allowed_providers:
+      - local
+      - openai
+      - anthropic
+      - gemini
+      - qwen
+      - deepseek
+      - zhipu
+      - moonshot
+      - minimax
+      - doubao
+      - hunyuan
+      - qianfan
+      - stepfun
+      - yi
+      - baichuan
+      - spark
+      - siliconflow
+      - sensenova
+      - mimo
+      - longcat
+    default_provider: local
+    allowed_models:
+      # Catalog locked on 2026-08-09. Models are ordered from highest
+      # capability to the fastest/lowest-cost production tier. Keep at most
+      # three current text/chat models per provider; the first is the default.
+      openai:
+        - gpt-5.6-sol
+        - gpt-5.6-terra
+        - gpt-5.6-luna
+      anthropic:
+        - claude-fable-5
+        - claude-opus-5
+        - claude-sonnet-5
+      gemini:
+        - gemini-3.5-flash
+        - gemini-3.6-flash
+        - gemini-3.5-flash-lite
+      qwen:
+        - qwen3.7-max
+        - qwen3.7-plus
+        - qwen3.6-flash
+      # DeepSeek currently publishes only two production chat model IDs.
+      deepseek:
+        - deepseek-v4-pro
+        - deepseek-v4-flash
+      zhipu:
+        - glm-5.2
+        - glm-5.1
+        - glm-5
+      moonshot:
+        - kimi-k3
+        - kimi-k2.6
+        - kimi-k2.5
+      minimax:
+        - MiniMax-M3
+        - MiniMax-M2.7
+        - MiniMax-M2.7-highspeed
+      # Some Ark accounts require endpoint IDs instead of these public aliases.
+      doubao:
+        - doubao-seed-evolving
+        - doubao-seed-2.1-pro
+        - doubao-seed-2.1-turbo
+      hunyuan:
+        - hunyuan-a13b
+        - hunyuan-turbos-latest
+        - hunyuan-lite
+      qianfan:
+        - ernie-5.1
+        - ernie-5.0
+        - ernie-4.5-turbo-128k
+      stepfun:
+        - step-3.5-flash
+        - step-3
+        - step-2-mini
+      # Yi currently lists only one general text model on its public catalog.
+      yi:
+        - yi-lightning
+      baichuan:
+        - Baichuan4-Turbo
+        - Baichuan4
+        - Baichuan4-Air
+      # These IDs use iFLYTEK Astron Token Plan's OpenAI-compatible endpoint.
+      spark:
+        - xsparkx2agent
+        - xsparkx2
+        - xsparkx2flash
+      # SiliconFlow is an aggregator. Replace these slots with the top three
+      # text models actually enabled in the tenant's current model marketplace.
+      siliconflow:
+        - replace-with-siliconflow-top1-model-id
+        - replace-with-siliconflow-top2-model-id
+        - replace-with-siliconflow-top3-model-id
+      # SenseNova returns account-specific IDs from its model-list API.
+      sensenova:
+        - replace-with-sensenova-v6.5-pro-model-id
+        - replace-with-sensenova-v6.5-turbo-model-id
+        - replace-with-sensenova-v6-reasoner-model-id
+      # MiMo currently publishes only two general text model IDs.
+      mimo:
+        - mimo-v2.5-pro
+        - mimo-v2.5
+      # LongCat currently publishes one production text model ID.
+      longcat:
+        - LongCat-2.0
+    default_models:
+      openai: gpt-5.6-sol
+      anthropic: claude-fable-5
+      gemini: gemini-3.5-flash
+      qwen: qwen3.7-max
+      deepseek: deepseek-v4-pro
+      zhipu: glm-5.2
+      moonshot: kimi-k3
+      minimax: MiniMax-M3
+      doubao: doubao-seed-evolving
+      hunyuan: hunyuan-a13b
+      qianfan: ernie-5.1
+      stepfun: step-3.5-flash
+      yi: yi-lightning
+      baichuan: Baichuan4-Turbo
+      spark: xsparkx2agent
+      siliconflow: replace-with-siliconflow-top1-model-id
+      sensenova: replace-with-sensenova-v6.5-pro-model-id
+      mimo: mimo-v2.5-pro
+      longcat: LongCat-2.0
+    # External callers cannot send approvals. Only trusted server-side config can
+    # pre-approve a capability. Keep this empty for real write operations.
+    approved_capabilities: []
+    rate_limit_per_minute: 60
+    monthly_request_quota: 10000

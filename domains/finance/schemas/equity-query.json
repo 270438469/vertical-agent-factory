@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EquityAnalysisQuery",
+  "type": "object",
+  "required": ["symbol"],
+  "properties": {
+    "symbol": {"type": "string", "minLength": 1, "maxLength": 20},
+    "lookback_days": {"type": "integer", "minimum": 20, "maximum": 730},
+    "simulate_failure": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

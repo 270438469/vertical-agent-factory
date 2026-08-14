@@ -1,0 +1,9 @@
+id: finance.validate-analysis
+version: 1.0.0
+task_types: [finance.macro.analyze, finance.a_share.analyze, finance.us_stock.analyze]
+preconditions: [result has been composed]
+inputs: {required: [result]}
+outputs: {required: [result]}
+requires: {capabilities: [core.finance.validate]}
+policy: {side_effect: none}
+runtime: {max_steps: 2, max_tool_calls: 1}

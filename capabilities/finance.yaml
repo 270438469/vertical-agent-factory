@@ -1,0 +1,43 @@
+capabilities:
+  - id: finance.macro_data.read
+    description: Read bounded China and US macroeconomic indicator observations.
+    risk: {class: READ, level: medium}
+    side_effect: false
+    required_scopes: []
+    input_schema_ref: domains/finance/schemas/macro-query.json
+    output_schema_ref: domains/finance/schemas/result.json
+  - id: finance.a_share_data.read
+    description: Read bounded A-share historical OHLCV observations.
+    risk: {class: READ, level: medium}
+    side_effect: false
+    required_scopes: []
+    input_schema_ref: domains/finance/schemas/equity-query.json
+    output_schema_ref: domains/finance/schemas/result.json
+  - id: finance.us_stock_data.read
+    description: Read bounded US-stock historical OHLCV observations.
+    risk: {class: READ, level: medium}
+    side_effect: false
+    required_scopes: []
+    input_schema_ref: domains/finance/schemas/equity-query.json
+    output_schema_ref: domains/finance/schemas/result.json
+  - id: finance.analysis.compose
+    description: Compute risk metrics and compose evidence-bounded financial analysis.
+    risk: {class: READ, level: medium}
+    side_effect: false
+    required_scopes: []
+    input_schema_ref: domains/finance/schemas/analysis-input.json
+    output_schema_ref: domains/finance/schemas/result.json
+  - id: core.finance.validate
+    description: Enforce data evidence, as-of date and financial disclaimer requirements.
+    risk: {class: READ, level: medium}
+    side_effect: false
+    required_scopes: []
+    input_schema_ref: domains/finance/schemas/result.json
+    output_schema_ref: domains/finance/schemas/result.json
+  - id: finance.briefing.publish
+    description: Publish an approved briefing to a configured external channel.
+    risk: {class: WRITE, level: high}
+    side_effect: true
+    required_scopes: [finance.briefing.write]
+    input_schema_ref: domains/finance/schemas/publish-query.json
+    output_schema_ref: domains/finance/schemas/result.json

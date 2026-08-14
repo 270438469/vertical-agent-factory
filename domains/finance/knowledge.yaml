@@ -1,0 +1,26 @@
+version: 1.0.0
+documents:
+  - id: finance-source-fred
+    title: FRED series observations API
+    source: https://fred.stlouisfed.org/docs/api/fred/series_observations.html
+    timestamp: "2026-08-14T00:00:00Z"
+    trust: primary
+    content: FRED provides HTTPS access to dated macroeconomic series observations and supports explicit series identifiers and bounded result limits.
+  - id: finance-source-tushare
+    title: Tushare Pro HTTP API
+    source: https://tushare.pro/document/1?doc_id=130
+    timestamp: "2026-08-14T00:00:00Z"
+    trust: primary
+    content: Tushare Pro accepts a JSON request containing api_name, token, params and fields, and returns aligned fields and items.
+  - id: finance-source-alpha-vantage
+    title: Alpha Vantage daily time series
+    source: https://www.alphavantage.co/documentation/#daily
+    timestamp: "2026-08-14T00:00:00Z"
+    trust: primary
+    content: Alpha Vantage TIME_SERIES_DAILY returns dated OHLCV observations for a requested global equity symbol.
+  - id: finance-risk-disclaimer
+    title: Financial analysis output boundary
+    source: domains/finance/domain.yaml
+    timestamp: "2026-08-14T00:00:00Z"
+    trust: primary
+    content: Outputs are for research and information only and are not investment advice, return guarantees or trade instructions.

@@ -85,8 +85,8 @@ const buildSteps = [
 
 const tests = [
   ["Package validation", "PASS", "引用、版本、Schema、Workflow 与高风险 Policy"],
-  ["Runtime tests", "14 / 14", "查询、无证据、审批、漂移、Provider、CLI 与 Trace"],
-  ["Golden evals", "30 / 30", "6 类真实边界，每类 5 个用例"],
+  ["Python tests", "76 / 76", "运行时、金融、微信、商业 API、Provider 与配置中心"],
+  ["Golden evals", "60 / 60", "研究与金融各覆盖 6 类真实边界"],
   ["Skill validation", "VALID", "Codex frontmatter 与 UI metadata"],
   ["Build + HTML", "PASS", "生产构建、服务端渲染与无障碍语义"],
 ];
@@ -142,7 +142,7 @@ export default function Home() {
       <header className="topbar">
         <a className="brand" href="#top" aria-label="Vertical Agent Factory 首页"><span>VAF</span><b>Vertical Agent Factory</b></a>
         <nav aria-label="页面导航">
-          <a href="#runtime">运行链</a><a href="#build">搭建</a><a href="#tests">自测试</a>
+          <a href="/finance">金融 Agent</a><a href="/setup">配置中心</a><a href="#runtime">运行链</a><a href="#build">搭建</a><a href="#tests">自测试</a>
         </nav>
         <a className="repo-link" href="https://github.com/270438469/vertical-agent-factory" target="_blank" rel="noreferrer">GitHub ↗</a>
       </header>
@@ -152,12 +152,13 @@ export default function Home() {
         <h1>把 Agent 系统<br /><em>拆开给你看。</em></h1>
         <p className="hero-copy">一套可运行、可审计、可替换 Provider 的垂直 Agent 工厂。这里不是架构幻灯片——每个节点都对应仓库里的真实契约。</p>
         <div className="hero-actions">
-          <a className="button primary" href="#runtime">进入运行实验室 <span>↓</span></a>
+          <a className="button primary" href="/setup">无代码配置 Agent <span>→</span></a>
+          <a className="button ghost" href="/finance">查看金融 Agent</a>
           <button className="button ghost" onClick={copyCommand}>{copied ? "已复制命令 ✓" : "复制快速运行命令"}</button>
         </div>
         <div className="score-strip" aria-label="系统验证摘要">
-          <div><strong>30/30</strong><span>Golden Evals</span></div>
-          <div><strong>14/14</strong><span>Runtime Tests</span></div>
+          <div><strong>60/60</strong><span>Golden Evals</span></div>
+          <div><strong>76/76</strong><span>Python Tests</span></div>
           <div><strong>0</strong><span>Policy Violations</span></div>
           <div><strong>8</strong><span>Traceable Layers</span></div>
         </div>

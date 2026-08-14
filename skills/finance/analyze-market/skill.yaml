@@ -1,0 +1,9 @@
+id: finance.analyze-market
+version: 1.0.0
+task_types: [finance.macro.analyze, finance.a_share.analyze, finance.us_stock.analyze]
+preconditions: [market_data has been loaded]
+inputs: {required: [market_data]}
+outputs: {required: [result]}
+requires: {capabilities: [finance.analysis.compose]}
+policy: {side_effect: none}
+runtime: {max_steps: 3, max_tool_calls: 1}

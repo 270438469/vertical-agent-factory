@@ -1,0 +1,35 @@
+id: finance
+version: 1.0.0
+name: Governed Financial Analysis
+description: Evidence-based macro, A-share and US-stock analysis with channel-safe outputs.
+
+scope:
+  include:
+    - macroeconomic indicator analysis with explicit as-of dates
+    - A-share historical market-data analysis
+    - US-stock historical market-data analysis
+    - concise financial briefings for authenticated channels
+  exclude:
+    - personalized investment advice
+    - guaranteed returns or price targets
+    - order placement, portfolio custody or automated trading
+    - claims without traceable data evidence
+
+users:
+  - financial researchers
+  - investor education teams
+  - content operators
+
+autonomy:
+  read: autonomous
+  analyze: autonomous
+  recommend: prohibited
+  trade: prohibited
+  publish: approval_required
+
+risk:
+  default: medium
+
+owners:
+  - platform
+  - finance-risk

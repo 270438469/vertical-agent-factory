@@ -1,0 +1,12 @@
+id: finance-analysis-agent
+version: 1.0.0
+domain: {id: finance, version: 1.0.0}
+task_types:
+  allow: [finance.macro.analyze, finance.a_share.analyze, finance.us_stock.analyze, finance.briefing.publish]
+skills:
+  allow: [finance.load-macro-data, finance.load-a-share-data, finance.load-us-stock-data, finance.analyze-market, finance.validate-analysis, finance.publish-briefing]
+capabilities:
+  allow: [finance.macro_data.read, finance.a_share_data.read, finance.us_stock_data.read, finance.analysis.compose, core.finance.validate, finance.briefing.publish]
+  deny: [finance.trade.execute, finance.portfolio.modify]
+policies: [finance-default]
+runtime: {max_steps: 12, max_tool_calls: 20}

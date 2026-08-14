@@ -91,6 +91,7 @@ Get-Content $latestRun.FullName
 后端与领域包：
 
 ```powershell
+python -m pip install -e ".[api,api-test]"
 python -m pytest -q
 vertical-agent --root . validate --domain research
 vertical-agent --root . eval --domain research
@@ -105,7 +106,7 @@ pnpm run lint
 pnpm test
 ```
 
-`pnpm test` 会先执行生产构建，再运行服务端渲染 HTML 测试。当前基线是 14 个 Python 测试、30/30 Golden Evals 和 2 个 HTML 测试。
+`pnpm test` 会先执行生产构建，再运行服务端渲染 HTML 测试。当前基线是 76 个 Python 测试、两个领域合计 60/60 Golden Evals 和 4 个 HTML 测试。
 
 ## 7. 运行 Web UI
 
@@ -122,6 +123,9 @@ pnpm run dev
 - Policies：只读、分析、建议和写入的自治边界。
 - Scenarios：5 种可交互执行结果。
 - Tests：系统自测覆盖面和当前基线。
+- Finance：宏观、A 股、美股风险指标、证据结构和微信公众号命令模拟。
+
+金融 Agent 的数据密钥、CLI/API 调用和微信公众号服务器配置详见[金融分析 Agent 与微信公众号接入手册](FINANCE_AGENT_AND_WECHAT.md)。
 
 在线地址：<https://vertical-agent-factory-lab.xuchong1999.chatgpt.site>
 

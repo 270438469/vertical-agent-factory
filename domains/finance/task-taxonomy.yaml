@@ -1,0 +1,44 @@
+tasks:
+  - id: finance.macro.analyze
+    class: ANALYZE
+    description: Analyze China, US or global macro indicators from configured sources.
+    required_entities: [MacroIndicator, FinancialAnalysis]
+    required_capabilities: [finance.macro_data.read, finance.analysis.compose, core.finance.validate]
+    evidence: {required: true}
+    side_effect: false
+    risk: medium
+    workflow: finance.macro-workflow
+    completion: [analysis includes as-of date, facts cite a configured data source, disclaimer is present]
+
+  - id: finance.a_share.analyze
+    class: ANALYZE
+    description: Analyze an A-share symbol from bounded historical market data.
+    required_entities: [Equity, MarketObservation, FinancialAnalysis]
+    required_capabilities: [finance.a_share_data.read, finance.analysis.compose, core.finance.validate]
+    evidence: {required: true}
+    side_effect: false
+    risk: medium
+    workflow: finance.a-share-workflow
+    completion: [symbol is normalized, risk metrics are returned, disclaimer is present]
+
+  - id: finance.us_stock.analyze
+    class: ANALYZE
+    description: Analyze a US-stock symbol from bounded historical market data.
+    required_entities: [Equity, MarketObservation, FinancialAnalysis]
+    required_capabilities: [finance.us_stock_data.read, finance.analysis.compose, core.finance.validate]
+    evidence: {required: true}
+    side_effect: false
+    risk: medium
+    workflow: finance.us-stock-workflow
+    completion: [symbol is validated, risk metrics are returned, disclaimer is present]
+
+  - id: finance.briefing.publish
+    class: WRITE
+    description: Publish an approved financial briefing to a configured channel.
+    required_entities: [FinancialAnalysis]
+    required_capabilities: [finance.briefing.publish]
+    evidence: {required: true}
+    side_effect: true
+    risk: high
+    workflow: finance.publish-workflow
+    completion: [publication action is audited]

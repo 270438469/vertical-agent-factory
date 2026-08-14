@@ -1,0 +1,6 @@
+id: finance.publish-workflow
+version: 1.0.0
+initial_state: AWAITING_POLICY
+states:
+  AWAITING_POLICY: {action: {skill: finance.publish-briefing}, next: COMPLETED, on_failure: FAILED}
+terminal: [COMPLETED, FAILED]

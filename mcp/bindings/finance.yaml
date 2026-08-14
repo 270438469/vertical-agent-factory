@@ -1,0 +1,37 @@
+bindings:
+  - capability: finance.macro_data.read
+    implementation: {protocol: local, handler: finance_macro_load}
+    priority: 100
+    health: healthy
+    timeout_seconds: 15
+    retry: {maximum: 1}
+  - capability: finance.a_share_data.read
+    implementation: {protocol: local, handler: finance_a_share_load}
+    priority: 100
+    health: healthy
+    timeout_seconds: 15
+    retry: {maximum: 1}
+  - capability: finance.us_stock_data.read
+    implementation: {protocol: local, handler: finance_us_stock_load}
+    priority: 100
+    health: healthy
+    timeout_seconds: 15
+    retry: {maximum: 1}
+  - capability: finance.analysis.compose
+    implementation: {protocol: local, handler: finance_analysis_compose}
+    priority: 100
+    health: healthy
+    timeout_seconds: 20
+    retry: {maximum: 0}
+  - capability: core.finance.validate
+    implementation: {protocol: local, handler: finance_result_validate}
+    priority: 100
+    health: healthy
+    timeout_seconds: 2
+    retry: {maximum: 0}
+  - capability: finance.briefing.publish
+    implementation: {protocol: local, handler: finance_briefing_publish}
+    priority: 100
+    health: healthy
+    timeout_seconds: 5
+    retry: {maximum: 0}

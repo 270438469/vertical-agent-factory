@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FinancialBriefingPublishQuery",
+  "type": "object",
+  "required": ["result", "channel"],
+  "properties": {
+    "result": {"type": "object"},
+    "channel": {"type": "string", "minLength": 1, "maxLength": 80}
+  },
+  "additionalProperties": false
+}

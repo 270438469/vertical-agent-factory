@@ -73,6 +73,12 @@ sequenceDiagram
 | Trace | 将运行事件写入 JSONL | `vertical_agent_factory/trace.py` |
 | Eval Runtime | 执行 Golden Cases 并比较预期结果 | `vertical_agent_factory/evals.py` |
 
+## 商业 API 边界
+
+`vertical_agent_factory/commercial/` 位于共享 Harness 外层，负责租户鉴权、资产 allowlist、限流、配额、幂等和用量计量。它不会绕过内部 Policy：请求通过商业网关后仍由 `AgentRuntime` 执行相同的 Capability 解析、审批、Trace 和证据校验。
+
+`model_providers.py` 提供 OpenAI、Anthropic、Gemini，以及 16 个中国 OpenAI-compatible 平台适配器。客户请求中的 `provider` 和 `model` 只有同时出现在租户 allowlist 时才会生效；模型厂商密钥始终由服务端环境提供。完整部署说明见[商业 API 接入与部署](COMMERCIAL_API.md)。
+
 ## Domain Pack 契约
 
 一个完整领域由以下可版本化资产组成：
@@ -111,4 +117,3 @@ sequenceDiagram
 6. **评测即契约**：Golden Cases 同时覆盖成功和失败语义。
 
 更完整的规范见[总体框架](../01-VERTICAL_AGENT_FRAMEWORK.md)与[领域包规范](../02-DOMAIN_PACKAGE_SPEC.md)。
-

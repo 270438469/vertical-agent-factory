@@ -1,0 +1,9 @@
+id: finance.load-macro-data
+version: 1.0.0
+task_types: [finance.macro.analyze]
+preconditions: [region is global, china or us]
+inputs: {required: []}
+outputs: {required: [market_data]}
+requires: {capabilities: [finance.macro_data.read]}
+policy: {side_effect: none}
+runtime: {max_steps: 2, max_tool_calls: 5}
