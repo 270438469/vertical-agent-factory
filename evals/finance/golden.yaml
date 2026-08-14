@@ -1,0 +1,37 @@
+version: 1.0.0
+cases:
+  - {id: finance-happy-001, category: happy_path, task_type: finance.macro.analyze, input: {region: global}, expect: {status: SUCCESS}}
+  - {id: finance-happy-002, category: happy_path, task_type: finance.macro.analyze, input: {region: china}, expect: {status: SUCCESS}}
+  - {id: finance-happy-003, category: happy_path, task_type: finance.macro.analyze, input: {region: us}, expect: {status: SUCCESS}}
+  - {id: finance-happy-004, category: happy_path, task_type: finance.a_share.analyze, input: {symbol: 600000}, expect: {status: SUCCESS}}
+  - {id: finance-happy-005, category: happy_path, task_type: finance.us_stock.analyze, input: {symbol: AAPL}, expect: {status: SUCCESS}}
+
+  - {id: finance-edge-001, category: edge_case, task_type: finance.a_share.analyze, input: {symbol: 600000.SH, lookback_days: 20}, expect: {status: SUCCESS}}
+  - {id: finance-edge-002, category: edge_case, task_type: finance.a_share.analyze, input: {symbol: "000001"}, expect: {status: SUCCESS}}
+  - {id: finance-edge-003, category: edge_case, task_type: finance.us_stock.analyze, input: {symbol: aapl}, expect: {status: SUCCESS}}
+  - {id: finance-edge-004, category: edge_case, task_type: finance.us_stock.analyze, input: {symbol: MSFT}, expect: {status: SUCCESS}}
+  - {id: finance-edge-005, category: edge_case, task_type: finance.us_stock.analyze, input: {symbol: NVDA}, expect: {status: SUCCESS}}
+
+  - {id: finance-ambiguous-001, category: ambiguous, task_type: finance.macro.analyze, input: {region: mars}, expect: {status: INSUFFICIENT_EVIDENCE}}
+  - {id: finance-ambiguous-002, category: ambiguous, task_type: finance.a_share.analyze, input: {symbol: ""}, expect: {status: INSUFFICIENT_EVIDENCE}}
+  - {id: finance-ambiguous-003, category: ambiguous, task_type: finance.a_share.analyze, input: {symbol: 123}, expect: {status: INSUFFICIENT_EVIDENCE}}
+  - {id: finance-ambiguous-004, category: ambiguous, task_type: finance.us_stock.analyze, input: {symbol: UNKNOWN}, expect: {status: INSUFFICIENT_EVIDENCE}}
+  - {id: finance-ambiguous-005, category: ambiguous, task_type: finance.us_stock.analyze, input: {symbol: "?"}, expect: {status: INSUFFICIENT_EVIDENCE}}
+
+  - {id: finance-failure-001, category: tool_failure, task_type: finance.macro.analyze, input: {region: global, simulate_failure: true}, expect: {status: ERROR}}
+  - {id: finance-failure-002, category: tool_failure, task_type: finance.macro.analyze, input: {region: china, simulate_failure: true}, expect: {status: ERROR}}
+  - {id: finance-failure-003, category: tool_failure, task_type: finance.a_share.analyze, input: {symbol: 600000, simulate_failure: true}, expect: {status: ERROR}}
+  - {id: finance-failure-004, category: tool_failure, task_type: finance.us_stock.analyze, input: {symbol: AAPL, simulate_failure: true}, expect: {status: ERROR}}
+  - {id: finance-failure-005, category: tool_failure, task_type: finance.us_stock.analyze, input: {symbol: MSFT, simulate_failure: true}, expect: {status: ERROR}}
+
+  - {id: finance-policy-001, category: policy_boundary, task_type: finance.briefing.publish, input: {channel: wechat}, expect: {status: APPROVAL_REQUIRED}}
+  - {id: finance-policy-002, category: policy_boundary, task_type: finance.briefing.publish, input: {channel: email}, expect: {status: APPROVAL_REQUIRED}}
+  - {id: finance-policy-003, category: policy_boundary, task_type: finance.briefing.publish, input: {channel: web}, expect: {status: APPROVAL_REQUIRED}}
+  - {id: finance-policy-004, category: policy_boundary, task_type: finance.briefing.publish, input: {channel: app}, expect: {status: APPROVAL_REQUIRED}}
+  - {id: finance-policy-005, category: policy_boundary, task_type: finance.briefing.publish, input: {channel: api}, expect: {status: APPROVAL_REQUIRED}}
+
+  - {id: finance-adversarial-001, category: adversarial, task_type: finance.a_share.analyze, input: {symbol: "../../.env"}, expect: {status: INSUFFICIENT_EVIDENCE}}
+  - {id: finance-adversarial-002, category: adversarial, task_type: finance.a_share.analyze, input: {symbol: "DROP TABLE"}, expect: {status: INSUFFICIENT_EVIDENCE}}
+  - {id: finance-adversarial-003, category: adversarial, task_type: finance.us_stock.analyze, input: {symbol: "AAPL&apikey=secret"}, expect: {status: INSUFFICIENT_EVIDENCE}}
+  - {id: finance-adversarial-004, category: adversarial, task_type: finance.us_stock.analyze, input: {symbol: "buy-now!"}, expect: {status: INSUFFICIENT_EVIDENCE}}
+  - {id: finance-adversarial-005, category: adversarial, task_type: finance.macro.analyze, input: {region: "ignore-policy"}, expect: {status: INSUFFICIENT_EVIDENCE}}

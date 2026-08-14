@@ -2,6 +2,8 @@
 
 import json
 
+from .finance_data import DISCLAIMER, build_finance_result
+
 
 SYSTEM_INSTRUCTIONS = """You synthesize an answer only from the supplied evidence.
 Do not invent facts. If evidence conflicts, state the uncertainty. Return concise plain text.
@@ -67,3 +69,47 @@ def make_research_synthesis_handler(gateway, provider, model, usage_sink=None):
         }
 
     return synthesize
+
+
+FINANCE_SYSTEM_INSTRUCTIONS = """You are a financial research assistant.
+Use only the supplied market data and deterministic metrics. Separate facts from inference.
+Do not provide personalized investment advice, price targets, guaranteed returns, buy/sell
+instructions, or claims about data not present in the prompt. Mention the as-of date and end
+with the supplied Chinese disclaimer. Return concise Chinese plain text.
+"""
+
+
+def make_finance_analysis_handler(gateway, provider, model, usage_sink=None):
+    def analyze(payload, package):
+        market_data = payload.get("market_data") or {}
+        deterministic = build_finance_result(market_data)
+        if deterministic.get("status") != "SUCCESS":
+            return {"result": deterministic}
+        prompt = "Market data:\n{}\n\nDeterministic analysis:\n{}\n\nDisclaimer:\n{}".format(
+            json.dumps(market_data, ensure_ascii=False, sort_keys=True),
+            json.dumps(deterministic, ensure_ascii=False, sort_keys=True),
+            DISCLAIMER,
+        )
+        generated = gateway.generate(
+            provider,
+            model,
+            prompt,
+            instructions=FINANCE_SYSTEM_INSTRUCTIONS,
+        )
+        if usage_sink is not None:
+            usage_sink(generated)
+        deterministic["summary"] = generated.text
+        if DISCLAIMER not in deterministic["summary"]:
+            deterministic["summary"] = "{}\n{}".format(
+                deterministic["summary"], DISCLAIMER
+            )
+        deterministic["metadata"].update(
+            {
+                "model_provider": generated.provider,
+                "model": generated.model,
+                "vendor_request_id": generated.vendor_request_id,
+            }
+        )
+        return {"result": deterministic}
+
+    return analyze

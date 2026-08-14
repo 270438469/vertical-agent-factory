@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MacroAnalysisQuery",
+  "type": "object",
+  "properties": {
+    "region": {"type": "string", "enum": ["global", "china", "us"]},
+    "simulate_failure": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

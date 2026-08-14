@@ -2,7 +2,7 @@
 
 一套 **Capability-first（能力优先）** 的垂直领域 Agent 工厂：用共享 Harness 承载运行时、策略、审批、追踪和评测，再通过可版本化的 Domain Pack 安装领域知识、任务、Skill、工作流与输出契约。
 
-[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [无代码配置中心](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/setup) · [无代码配置手册](docs/NO_CODE_SETUP_UI.md) · [全面自测试报告](docs/SELF_TEST_REPORT.md) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [逐步配置手册](docs/COMMERCIAL_SETUP_STEP_BY_STEP.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md) · [Domain Pack 搭建指南](docs/DOMAIN_PACK_GUIDE.md)
+[在线可视化实验室](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site) · [金融 Agent 工作台](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/finance) · [金融 Agent 与微信接入](docs/FINANCE_AGENT_AND_WECHAT.md) · [无代码配置中心](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/setup) · [全面自测试报告](docs/SELF_TEST_REPORT.md) · [详细使用手册](docs/USAGE.md) · [商业 API](docs/COMMERCIAL_API.md) · [模型前三档](docs/MODEL_TIERS.md) · [架构说明](docs/ARCHITECTURE.md)
 
 ## 它解决什么问题
 
@@ -28,10 +28,11 @@ flowchart LR
 ## 当前包含
 
 - 可执行 Python Harness：包加载、校验、能力解析、策略、审批、工作流、Trace 和 Eval。
-- 完整 `research` 示例 Domain Pack：2 类任务、4 个 Skill、4 项 Capability、2 条工作流。
-- 30 个 Golden Evals、14 个核心系统测试与 46 个商业 API/Provider 测试。
-- 交互式 Web UI：演示运行链，并提供面向非技术用户的五步 Agent 配置向导。
+- `research` 与 `finance` 两个 Domain Pack；金融包覆盖宏观、A 股、美股和受审批保护的简报发布。
+- 60 个跨领域 Golden Evals、76 个 Python 自动化测试。
+- 交互式 Web UI：系统运行链、金融研究工作台，以及面向非技术用户的五步 Agent/数据源/微信公众号配置向导。
 - 多租户商业 REST API：API Key、限流、配额、计量、幂等，以及 16 个中国模型 Provider 和 3 个国际厂商适配。
+- 微信公众号通道：服务器签名校验、明文 XML、命令路由、幂等被动文本回复；不开放主动群发或交易。
 - 领域包规范、模板目录、维护流程与验收清单。
 
 ## 商业 API
@@ -106,7 +107,7 @@ pnpm run lint
 pnpm test
 ```
 
-当前基线：60 个 Python 测试、30/30 Golden Evals、3 个服务端渲染 HTML 测试，生产构建与 lint 通过。
+当前基线：76 个 Python 测试、60/60 Golden Evals、4 个服务端渲染 HTML 测试，生产构建与 lint 通过。
 
 ## 项目结构
 
@@ -114,7 +115,9 @@ pnpm test
 vertical_agent_factory/   共享 Harness 与 CLI
 vertical_agent_factory/commercial/  多租户商业 API
 domains/research/         领域定义、知识、任务、Schema、工作流
+domains/finance/          宏观、A 股、美股任务、Schema 与工作流
 agents/research/          Agent Manifest 与系统约束
+agents/finance/           金融研究 Agent 与安全边界
 skills/research/          Skill 契约与执行说明
 capabilities/             语义能力注册
 mcp/bindings/             Capability 到 Provider 的绑定
@@ -129,6 +132,7 @@ config/                   商业 API 配置示例
 ## 从这里继续
 
 - 第一次运行：阅读[详细使用手册](docs/USAGE.md)。
+- 运行金融 Agent 或接微信公众号：阅读[金融分析 Agent 与微信公众号接入手册](docs/FINANCE_AGENT_AND_WECHAT.md)。
 - 不写代码配置 Agent：使用[无代码配置中心](https://vertical-agent-factory-lab.xuchong1999.chatgpt.site/setup)并阅读[无代码配置手册](docs/NO_CODE_SETUP_UI.md)。
 - 对外提供服务：阅读[商业 API 接入与部署](docs/COMMERCIAL_API.md)。
 - 理解执行链：阅读[架构说明](docs/ARCHITECTURE.md)。

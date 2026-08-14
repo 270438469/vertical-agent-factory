@@ -54,9 +54,14 @@ tenants:
     api_key_env: VAF_API_KEY_DEMO
     allowed_domains:
       - research
+      - finance
     allowed_tasks:
       - research.answer.query
       - research.report.publish
+      - finance.macro.analyze
+      - finance.a_share.analyze
+      - finance.us_stock.analyze
+      - finance.briefing.publish
     allowed_providers:
       - local
       - openai

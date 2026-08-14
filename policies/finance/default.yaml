@@ -1,0 +1,9 @@
+id: finance-default
+version: 1.0.0
+rules:
+  - id: allow-bounded-analysis
+    when: {risk_class: READ, side_effect: false}
+    decision: allow
+  - id: require-publication-approval
+    when: {risk_class: WRITE, side_effect: true}
+    decision: approval_required

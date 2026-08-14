@@ -1,0 +1,9 @@
+id: finance.publish-briefing
+version: 1.0.0
+task_types: [finance.briefing.publish]
+preconditions: [a validated briefing and explicit approval are present]
+inputs: {required: [result, channel]}
+outputs: {required: [result]}
+requires: {capabilities: [finance.briefing.publish]}
+policy: {side_effect: approval_required}
+runtime: {max_steps: 2, max_tool_calls: 1}

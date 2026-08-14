@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FinancialAnalysisInput",
+  "type": "object",
+  "required": ["market_data"],
+  "properties": {
+    "market_data": {"type": "object"},
+    "region": {"type": "string"},
+    "symbol": {"type": "string"},
+    "locale": {"type": "string"}
+  },
+  "additionalProperties": true
+}

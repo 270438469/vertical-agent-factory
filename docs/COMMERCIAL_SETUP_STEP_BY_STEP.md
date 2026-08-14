@@ -534,7 +534,7 @@ Set-Location ..
 当前仓库基线：
 
 - 60/60 Python 测试。
-- 30/30 Golden Evals。
+- 两个领域合计 60/60 Golden Evals。
 - 2/2 Web 渲染测试。
 - Web lint 和生产构建通过。
 
@@ -649,7 +649,7 @@ docker run --rm `
 - [ ] 每个 `default_models` 等于对应列表第一项。
 - [ ] SiliconFlow、SenseNova、豆包账号专属槽位已替换。
 - [ ] `approved_capabilities` 默认为空。
-- [ ] 60/60 Python 测试、30/30 Golden Evals、Web 测试和构建通过。
+- [ ] 76/76 Python 测试、60/60 Golden Evals、Web 测试和构建通过。
 - [ ] 每个启用厂商完成最小真实 API 请求。
 - [ ] `/v1/models` 只展示当前租户权限。
 - [ ] `/v1/usage` 能记录请求和 Token。

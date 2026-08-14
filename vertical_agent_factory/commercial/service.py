@@ -9,7 +9,7 @@ import uuid
 from collections import defaultdict, deque
 
 from ..errors import ApprovalRequired, AgentFactoryError
-from ..model_handlers import make_research_synthesis_handler
+from ..model_handlers import make_finance_analysis_handler, make_research_synthesis_handler
 from ..model_providers import ModelGateway
 from ..runtime import AgentRuntime
 from .usage import UsageStore
@@ -106,6 +106,16 @@ class CommercialService(object):
         )
         return summary
 
+    def tenant(self, tenant_id=None):
+        if tenant_id:
+            for item in self.config.tenants:
+                if item.tenant_id == tenant_id:
+                    return item
+            raise CommercialAPIError(503, "wechat_tenant_missing", "Configured WeChat tenant was not found")
+        if len(self.config.tenants) == 1:
+            return self.config.tenants[0]
+        raise CommercialAPIError(503, "wechat_tenant_required", "VAF_WECHAT_TENANT_ID is required when multiple tenants exist")
+
     def run(self, tenant, payload, idempotency_key=None):
         request_hash = hashlib.sha256(
             json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
@@ -144,7 +154,12 @@ class CommercialService(object):
         captured_usage = {}
         handlers = {}
         if provider != "local":
-            if task != "research.answer.query":
+            finance_tasks = {
+                "finance.macro.analyze",
+                "finance.a_share.analyze",
+                "finance.us_stock.analyze",
+            }
+            if task != "research.answer.query" and task not in finance_tasks:
                 raise CommercialAPIError(
                     400,
                     "provider_not_supported_for_task",
@@ -154,9 +169,14 @@ class CommercialService(object):
             def capture(result):
                 captured_usage.update(result.usage())
 
-            handlers["research_answer_synthesize"] = make_research_synthesis_handler(
-                self.model_gateway, provider, model, usage_sink=capture
-            )
+            if task == "research.answer.query":
+                handlers["research_answer_synthesize"] = make_research_synthesis_handler(
+                    self.model_gateway, provider, model, usage_sink=capture
+                )
+            else:
+                handlers["finance_analysis_compose"] = make_finance_analysis_handler(
+                    self.model_gateway, provider, model, usage_sink=capture
+                )
 
         approvals = {item: True for item in tenant.approved_capabilities}
         status = "SUCCESS"

@@ -6,11 +6,12 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from .config import load_commercial_config
 from .service import CommercialAPIError, CommercialService
+from ..channels.wechat import WeChatChannelError, WeChatOfficialAccountChannel
 from .setup import (
     SetupValidationError,
     apply_setup,
@@ -42,6 +43,18 @@ class ProviderSetupRequest(BaseModel):
     models: List[str] = Field(default_factory=list, max_length=3)
 
 
+class FinanceSetupRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    data_mode: str = Field(default="fixture", max_length=20)
+    tushare_token: str = Field(default="", max_length=4096)
+    alphavantage_api_key: str = Field(default="", max_length=4096)
+    fred_api_key: str = Field(default="", max_length=4096)
+    wechat_enabled: bool = False
+    wechat_token: str = Field(default="", max_length=4096)
+    wechat_data_mode: str = Field(default="fixture", max_length=20)
+
+
 class SetupRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -52,6 +65,7 @@ class SetupRequest(BaseModel):
     default_provider: str = Field(default="local", max_length=40)
     rate_limit_per_minute: int = Field(default=60, ge=1, le=100000)
     monthly_request_quota: int = Field(default=10000, ge=1, le=1000000000)
+    finance: Optional[FinanceSetupRequest] = None
 
 
 def create_app(config_path=None, service=None):
@@ -180,6 +194,50 @@ def create_app(config_path=None, service=None):
             path,
             os.environ.get("VAF_SETUP_ENV_FILE", ".env"),
         )
+
+    def wechat_channel():
+        if app.state.commercial_service is None:
+            raise CommercialAPIError(503, "setup_required", "Commercial API setup is incomplete")
+        token = os.environ.get("WECHAT_OFFICIAL_ACCOUNT_TOKEN", "")
+        if len(token) < 16:
+            raise CommercialAPIError(503, "wechat_not_configured", "WeChat Official Account token is not configured")
+        return WeChatOfficialAccountChannel(app.state.commercial_service, token=token)
+
+    @app.get("/v1/channels/wechat/official-account", tags=["channels"])
+    def verify_wechat_callback(
+        signature: str = "", timestamp: str = "", nonce: str = "", echostr: str = ""
+    ):
+        channel = wechat_channel()
+        if not channel.verify(signature, timestamp, nonce):
+            raise CommercialAPIError(403, "wechat_signature_invalid", "Invalid WeChat signature")
+        return PlainTextResponse(echostr)
+
+    @app.post("/v1/channels/wechat/official-account", tags=["channels"])
+    async def receive_wechat_message(
+        request: Request,
+        signature: str = "",
+        timestamp: str = "",
+        nonce: str = "",
+        encrypt_type: str = "",
+    ):
+        channel = wechat_channel()
+        if encrypt_type and encrypt_type.lower() != "raw":
+            raise CommercialAPIError(
+                501,
+                "wechat_encryption_not_enabled",
+                "This deployment supports WeChat plaintext mode only",
+            )
+        if not channel.verify(signature, timestamp, nonce):
+            raise CommercialAPIError(403, "wechat_signature_invalid", "Invalid WeChat signature")
+        raw = await request.body()
+        maximum_wechat_bytes = int(os.environ.get("VAF_WECHAT_MAX_REQUEST_BYTES", "65536"))
+        if len(raw) > maximum_wechat_bytes:
+            raise CommercialAPIError(413, "wechat_message_too_large", "WeChat message exceeds the configured limit")
+        try:
+            rendered = channel.handle(raw)
+        except WeChatChannelError as exc:
+            raise CommercialAPIError(400, "invalid_wechat_message", str(exc))
+        return Response(content=rendered, media_type="application/xml")
 
     @app.get("/v1/models", tags=["models"])
     def models(tenant=Depends(current_tenant)):

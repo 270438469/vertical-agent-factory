@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vertical-agent-factory"
-version = "0.2.0"
+version = "0.3.0"
 description = "Capability-first runtime and validator for vertical agent domain packages"
 requires-python = ">=3.7"
 dependencies = ["PyYAML>=6.0"]

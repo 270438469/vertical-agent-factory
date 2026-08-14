@@ -1,0 +1,9 @@
+id: finance.load-a-share-data
+version: 1.0.0
+task_types: [finance.a_share.analyze]
+preconditions: [an A-share symbol is present]
+inputs: {required: [symbol]}
+outputs: {required: [market_data]}
+requires: {capabilities: [finance.a_share_data.read]}
+policy: {side_effect: none}
+runtime: {max_steps: 2, max_tool_calls: 2}

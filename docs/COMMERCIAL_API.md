@@ -4,6 +4,8 @@
 
 如果是第一次部署，请先按[商业 API 逐步配置手册](COMMERCIAL_SETUP_STEP_BY_STEP.md)完成环境、租户、密钥、模型、启动和验收配置。
 
+金融宏观、A 股、美股数据源和微信公众号回调的完整配置见[金融分析 Agent 与微信公众号接入手册](FINANCE_AGENT_AND_WECHAT.md)。
+
 ```mermaid
 flowchart LR
     C["客户系统"] -->|"Bearer API Key"| G["Commercial API Gateway"]

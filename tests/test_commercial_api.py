@@ -438,3 +438,54 @@ def test_setup_api_is_hidden_without_an_admin_key(tmp_path, monkeypatch):
     client = TestClient(create_app(service=service))
     response = client.get("/v1/setup/status")
     assert response.status_code == 404
+
+
+def test_external_model_can_compose_finance_analysis(tmp_path, monkeypatch):
+    service, gateway = make_service(tmp_path, monkeypatch)
+    tenant = service.config.tenants[0]
+    tenant.allowed_domains.append("finance")
+    tenant.allowed_tasks.append("finance.us_stock.analyze")
+    monkeypatch.setenv("VAF_FINANCE_DATA_MODE", "fixture")
+    client = TestClient(create_app(service=service))
+    response = client.post(
+        "/v1/agent/runs",
+        headers=auth_headers(),
+        json={
+            "domain": "finance",
+            "task": "finance.us_stock.analyze",
+            "input": {"symbol": "AAPL"},
+            "provider": "openai",
+            "model": "approved-model",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["provider"] == "openai"
+    assert body["result"]["status"] == "SUCCESS"
+    assert body["result"]["metadata"]["model_provider"] == "openai"
+    assert gateway.calls[0][0:2] == ("openai", "approved-model")
+
+
+def test_setup_converter_configures_finance_data_and_wechat_secrets():
+    payload = setup_payload()
+    payload["allowed_tasks"] = [
+        "finance.macro.analyze",
+        "finance.a_share.analyze",
+        "finance.us_stock.analyze",
+    ]
+    payload["finance"] = {
+        "data_mode": "live",
+        "tushare_token": "tushare-secret-token",
+        "alphavantage_api_key": "alpha-secret-key",
+        "fred_api_key": "fred-secret-key",
+        "wechat_enabled": True,
+        "wechat_token": "wechat-token-long-enough",
+        "wechat_data_mode": "fixture",
+    }
+    converted = convert_setup(payload, require_secrets=True)
+    tenant = converted["config"]["tenants"][0]
+    assert tenant["allowed_domains"] == ["finance"]
+    assert converted["secrets"]["VAF_FINANCE_DATA_MODE"] == "live"
+    assert converted["secrets"]["TUSHARE_TOKEN"] == "tushare-secret-token"
+    assert converted["secrets"]["WECHAT_OFFICIAL_ACCOUNT_TOKEN"] == "wechat-token-long-enough"
+    assert "wechat-token-long-enough" not in converted["yaml"]

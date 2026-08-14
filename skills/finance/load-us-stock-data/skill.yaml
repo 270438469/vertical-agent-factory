@@ -1,0 +1,9 @@
+id: finance.load-us-stock-data
+version: 1.0.0
+task_types: [finance.us_stock.analyze]
+preconditions: [a US-stock symbol is present]
+inputs: {required: [symbol]}
+outputs: {required: [market_data]}
+requires: {capabilities: [finance.us_stock_data.read]}
+policy: {side_effect: none}
+runtime: {max_steps: 2, max_tool_calls: 1}

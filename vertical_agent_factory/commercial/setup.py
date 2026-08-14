@@ -217,7 +217,14 @@ def convert_setup(payload, require_secrets=False):
         errors.append("客户标识只能包含字母、数字、短横线或下划线，且不超过 80 个字符")
 
     tasks = list(dict.fromkeys(payload.get("allowed_tasks") or []))
-    supported_tasks = {"research.answer.query", "research.report.publish"}
+    supported_tasks = {
+        "research.answer.query",
+        "research.report.publish",
+        "finance.macro.analyze",
+        "finance.a_share.analyze",
+        "finance.us_stock.analyze",
+        "finance.briefing.publish",
+    }
     if not tasks or any(task not in supported_tasks for task in tasks):
         errors.append("至少选择一个受支持的 Agent 任务")
 
@@ -297,12 +304,62 @@ def convert_setup(payload, require_secrets=False):
     elif customer_api_key and len(customer_api_key) < 32:
         warnings.append("客户调用密钥不足 32 个字符，正式应用前必须重新生成")
 
+    finance_tasks = {task for task in tasks if task.startswith("finance.")}
+    finance = payload.get("finance") or {}
+    data_mode = str(finance.get("data_mode") or "fixture").lower()
+    if data_mode not in {"fixture", "live"}:
+        errors.append("金融数据模式只能是 fixture 或 live")
+    finance_secrets = {
+        "TUSHARE_TOKEN": str(finance.get("tushare_token") or ""),
+        "ALPHAVANTAGE_API_KEY": str(finance.get("alphavantage_api_key") or ""),
+        "FRED_API_KEY": str(finance.get("fred_api_key") or ""),
+    }
+    for name, value in finance_secrets.items():
+        if value and not _safe_secret(value):
+            errors.append("{} 包含不允许的换行或空字符".format(name))
+    if require_secrets and finance_tasks and data_mode == "live":
+        if "finance.a_share.analyze" in finance_tasks and not finance_secrets["TUSHARE_TOKEN"]:
+            errors.append("真实 A 股数据需要 TUSHARE_TOKEN")
+        if "finance.us_stock.analyze" in finance_tasks and not finance_secrets["ALPHAVANTAGE_API_KEY"]:
+            errors.append("真实美股数据需要 ALPHAVANTAGE_API_KEY")
+        if "finance.macro.analyze" in finance_tasks:
+            if not finance_secrets["TUSHARE_TOKEN"]:
+                errors.append("全球宏观中的中国数据需要 TUSHARE_TOKEN")
+            if not finance_secrets["FRED_API_KEY"]:
+                errors.append("全球宏观中的美国数据需要 FRED_API_KEY")
+
+    wechat_enabled = bool(finance.get("wechat_enabled"))
+    wechat_token = str(finance.get("wechat_token") or "")
+    wechat_data_mode = str(finance.get("wechat_data_mode") or "fixture").lower()
+    if wechat_data_mode not in {"fixture", "live"}:
+        errors.append("微信公众号金融数据模式只能是 fixture 或 live")
+    if wechat_enabled and not finance_tasks:
+        errors.append("接入微信公众号前至少启用一个金融分析任务")
+    if wechat_enabled and len(wechat_token) < 16:
+        errors.append("微信公众号 Token 至少需要 16 个字符")
+    if wechat_token and not _safe_secret(wechat_token):
+        errors.append("微信公众号 Token 包含不允许的换行或空字符")
+
     if errors:
         raise SetupValidationError(errors)
 
     tenant_env = _tenant_env_name(tenant_id)
     if customer_api_key:
         secrets[tenant_env] = customer_api_key
+    if finance_tasks:
+        secrets["VAF_FINANCE_DATA_MODE"] = data_mode
+        for name, value in finance_secrets.items():
+            if value:
+                secrets[name] = value
+    if wechat_enabled:
+        secrets["WECHAT_OFFICIAL_ACCOUNT_TOKEN"] = wechat_token
+        secrets["VAF_WECHAT_TENANT_ID"] = tenant_id
+        secrets["VAF_WECHAT_FINANCE_DATA_MODE"] = wechat_data_mode
+    allowed_domains = []
+    if any(task.startswith("research.") for task in tasks):
+        allowed_domains.append("research")
+    if finance_tasks:
+        allowed_domains.append("finance")
     config = {
         "project_root": "..",
         "database_path": ".commercial/usage.sqlite3",
@@ -311,7 +368,7 @@ def convert_setup(payload, require_secrets=False):
             {
                 "id": tenant_id,
                 "api_key_env": tenant_env,
-                "allowed_domains": ["research"],
+                "allowed_domains": allowed_domains,
                 "allowed_tasks": tasks,
                 "allowed_providers": allowed_provider_ids,
                 "default_provider": default_provider,
@@ -326,15 +383,21 @@ def convert_setup(payload, require_secrets=False):
     yaml_text = yaml.safe_dump(
         config, allow_unicode=True, sort_keys=False, default_flow_style=False
     )
+    environment_names = [tenant_env]
+    environment_names += [PROVIDER_CATALOG[item]["api_key_env"] for item in provider_by_id]
+    environment_names += [
+        PROVIDER_CATALOG[item]["base_url_env"]
+        for item in provider_by_id
+        if PROVIDER_CATALOG[item].get("base_url_env")
+    ]
+    if finance_tasks:
+        environment_names += ["VAF_FINANCE_DATA_MODE", "TUSHARE_TOKEN", "ALPHAVANTAGE_API_KEY", "FRED_API_KEY"]
+    if wechat_enabled:
+        environment_names += ["WECHAT_OFFICIAL_ACCOUNT_TOKEN", "VAF_WECHAT_TENANT_ID", "VAF_WECHAT_FINANCE_DATA_MODE"]
+    environment_names = list(dict.fromkeys(environment_names))
     env_template = "\n".join(
         "{}={}".format(name, "configured" if name in secrets else "<请填写>")
-        for name in [tenant_env]
-        + [PROVIDER_CATALOG[item]["api_key_env"] for item in provider_by_id]
-        + [
-            PROVIDER_CATALOG[item]["base_url_env"]
-            for item in provider_by_id
-            if PROVIDER_CATALOG[item].get("base_url_env")
-        ]
+        for name in environment_names
     )
     return {
         "config": config,

@@ -1,0 +1,8 @@
+id: finance.a-share-workflow
+version: 1.0.0
+initial_state: LOADING_DATA
+states:
+  LOADING_DATA: {action: {skill: finance.load-a-share-data}, next: ANALYZING, on_failure: FAILED}
+  ANALYZING: {action: {skill: finance.analyze-market}, next: VALIDATING, on_failure: FAILED}
+  VALIDATING: {action: {skill: finance.validate-analysis}, next: COMPLETED, on_failure: FAILED}
+terminal: [COMPLETED, FAILED]

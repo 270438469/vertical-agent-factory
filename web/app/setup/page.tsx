@@ -42,6 +42,10 @@ const steps = ["业务用途", "选择厂商", "密钥与模型", "权限与额�
 const taskOptions = [
   { id: "research.answer.query", title: "查询并生成答案", note: "只读任务。先检索证据，再生成有依据的答案。" },
   { id: "research.report.publish", title: "发布研究报告", note: "写操作。默认不会自动获批，运行时进入审批门。" },
+  { id: "finance.macro.analyze", title: "金融宏观分析", note: "分析中国、美国或全球宏观指标，保留发布日期与来源。" },
+  { id: "finance.a_share.analyze", title: "A 股分析", note: "分析日线价格、区间收益、历史波动率和最大回撤。" },
+  { id: "finance.us_stock.analyze", title: "美股分析", note: "分析美股日线风险指标，不给出买卖指令或收益承诺。" },
+  { id: "finance.briefing.publish", title: "发布金融简报", note: "高风险写操作，必须经过 Harness 审批；公众号被动回复不等同于群发。" },
 ];
 
 function randomSecret() {
@@ -62,7 +66,7 @@ export default function SetupPage() {
   const [step, setStep] = useState(0);
   const [tenantId, setTenantId] = useState("demo-customer");
   const [tasks, setTasks] = useState(["research.answer.query"]);
-  const [selected, setSelected] = useState<string[]>(["deepseek"]);
+  const [selected, setSelected] = useState<string[]>([]);
   const [values, setValues] = useState<Record<string, ProviderValue>>(() => Object.fromEntries(providers.map((provider) => [provider.id, { apiKey: "", baseUrl: "", models: [...provider.models] }])));
   const [customerKey, setCustomerKey] = useState("");
   const [defaultProvider, setDefaultProvider] = useState("local");
@@ -71,6 +75,14 @@ export default function SetupPage() {
   const [apiBase, setApiBase] = useState("http://127.0.0.1:8000");
   const [adminKey, setAdminKey] = useState("");
   const [browserOrigin, setBrowserOrigin] = useState("");
+  const [financeDataMode, setFinanceDataMode] = useState("fixture");
+  const [tushareToken, setTushareToken] = useState("");
+  const [alphaVantageKey, setAlphaVantageKey] = useState("");
+  const [fredKey, setFredKey] = useState("");
+  const [wechatEnabled, setWechatEnabled] = useState(false);
+  const [wechatToken, setWechatToken] = useState("");
+  const [wechatDataMode, setWechatDataMode] = useState("fixture");
+  const [publicApiBase, setPublicApiBase] = useState("https://api.example.com");
   const [result, setResult] = useState<{ kind: "idle" | "working" | "success" | "error"; message: string }>({ kind: "idle", message: "" });
   const [previewYaml, setPreviewYaml] = useState("");
   const [copied, setCopied] = useState(false);
@@ -79,12 +91,14 @@ export default function SetupPage() {
     const timer = window.setTimeout(() => {
       setCustomerKey(randomSecret());
       setAdminKey(randomSecret());
+      setWechatToken(randomSecret());
       setBrowserOrigin(window.location.origin);
     }, 0);
     return () => window.clearTimeout(timer);
   }, []);
 
   const chosenProviders = useMemo(() => providers.filter((provider) => selected.includes(provider.id)), [selected]);
+  const financeEnabled = useMemo(() => tasks.some((task) => task.startsWith("finance.")), [tasks]);
   const payload = useMemo(() => ({
     tenant_id: tenantId.trim(),
     customer_api_key: customerKey,
@@ -93,7 +107,16 @@ export default function SetupPage() {
     default_provider: defaultProvider,
     rate_limit_per_minute: rateLimit,
     monthly_request_quota: monthlyQuota,
-  }), [tenantId, customerKey, tasks, chosenProviders, values, defaultProvider, rateLimit, monthlyQuota]);
+    finance: financeEnabled ? {
+      data_mode: financeDataMode,
+      tushare_token: tushareToken,
+      alphavantage_api_key: alphaVantageKey,
+      fred_api_key: fredKey,
+      wechat_enabled: wechatEnabled,
+      wechat_token: wechatEnabled ? wechatToken : "",
+      wechat_data_mode: wechatDataMode,
+    } : null,
+  }), [tenantId, customerKey, tasks, chosenProviders, values, defaultProvider, rateLimit, monthlyQuota, financeEnabled, financeDataMode, tushareToken, alphaVantageKey, fredKey, wechatEnabled, wechatToken, wechatDataMode]);
 
   const localYaml = useMemo(() => {
     const lines = ["project_root: ..", "database_path: .commercial/usage.sqlite3", "providers:"];
@@ -102,7 +125,10 @@ export default function SetupPage() {
       lines.push(`  ${provider.id}:`, `    api_key_env: ${provider.keyEnv}`);
       if (provider.baseUrlEnv) lines.push(`    base_url_env: ${provider.baseUrlEnv}`);
     });
-    lines.push("tenants:", `  - id: ${yamlQuote(tenantId.trim())}`, `    api_key_env: ${tenantEnv(tenantId.trim())}`, "    allowed_domains:", "      - research", "    allowed_tasks:");
+    lines.push("tenants:", `  - id: ${yamlQuote(tenantId.trim())}`, `    api_key_env: ${tenantEnv(tenantId.trim())}`, "    allowed_domains:");
+    if (tasks.some((task) => task.startsWith("research."))) lines.push("      - research");
+    if (financeEnabled) lines.push("      - finance");
+    lines.push("    allowed_tasks:");
     tasks.forEach((task) => lines.push(`      - ${task}`));
     lines.push("    allowed_providers:", "      - local");
     chosenProviders.forEach((provider) => lines.push(`      - ${provider.id}`));
@@ -117,7 +143,7 @@ export default function SetupPage() {
     chosenProviders.forEach((provider) => lines.push(`      ${provider.id}: ${yamlQuote(values[provider.id].models.filter(Boolean)[0] || "")}`));
     lines.push("    approved_capabilities: []", `    rate_limit_per_minute: ${rateLimit}`, `    monthly_request_quota: ${monthlyQuota}`);
     return `${lines.join("\n")}\n`;
-  }, [tenantId, tasks, chosenProviders, values, defaultProvider, rateLimit, monthlyQuota]);
+  }, [tenantId, tasks, chosenProviders, values, defaultProvider, rateLimit, monthlyQuota, financeEnabled]);
 
   function toggleProvider(id: string) {
     setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
@@ -142,8 +168,17 @@ export default function SetupPage() {
         return !values[provider.id].apiKey || !models.length || models.some((model) => model.startsWith("replace-with-"));
       });
       if (incomplete) return `请完成 ${incomplete.name} 的 API Key 和真实模型 ID。`;
+      if (financeEnabled && financeDataMode === "live") {
+        if (tasks.includes("finance.a_share.analyze") && !tushareToken) return "真实 A 股数据需要填写 Tushare Token。";
+        if (tasks.includes("finance.us_stock.analyze") && !alphaVantageKey) return "真实美股数据需要填写 Alpha Vantage API Key。";
+        if (tasks.includes("finance.macro.analyze") && (!tushareToken || !fredKey)) return "全球宏观数据需要同时填写 Tushare Token 和 FRED API Key。";
+      }
     }
-    if (step === 3 && customerKey.length < 32) return "客户调用密钥至少需要 32 个字符。";
+    if (step === 3) {
+      if (customerKey.length < 32) return "客户调用密钥至少需要 32 个字符。";
+      if (wechatEnabled && wechatToken.length < 16) return "微信公众号 Token 至少需要 16 个字符。";
+      if (wechatEnabled && !publicApiBase.startsWith("https://")) return "微信公众号回调必须使用可公网访问的 HTTPS API 地址。";
+    }
     return "";
   }
 
@@ -187,6 +222,17 @@ export default function SetupPage() {
       lines.push(`${provider.keyEnv}=${values[provider.id].apiKey}`);
       if (provider.baseUrlEnv && values[provider.id].baseUrl) lines.push(`${provider.baseUrlEnv}=${values[provider.id].baseUrl}`);
     });
+    if (financeEnabled) {
+      lines.push(`VAF_FINANCE_DATA_MODE=${financeDataMode}`);
+      if (tushareToken) lines.push(`TUSHARE_TOKEN=${tushareToken}`);
+      if (alphaVantageKey) lines.push(`ALPHAVANTAGE_API_KEY=${alphaVantageKey}`);
+      if (fredKey) lines.push(`FRED_API_KEY=${fredKey}`);
+    }
+    if (wechatEnabled) {
+      lines.push(`WECHAT_OFFICIAL_ACCOUNT_TOKEN=${wechatToken}`);
+      lines.push(`VAF_WECHAT_TENANT_ID=${tenantId}`);
+      lines.push(`VAF_WECHAT_FINANCE_DATA_MODE=${wechatDataMode}`);
+    }
     download(".env", `${lines.join("\n")}\n`);
   }
 
@@ -223,11 +269,11 @@ export default function SetupPage() {
           {step === 0 && <div className="form-section">
             <div className="field"><label htmlFor="tenant">客户 / 项目标识</label><input id="tenant" value={tenantId} onChange={(event) => setTenantId(event.target.value)} placeholder="例如：acme-research" /><small>用于隔离客户权限和用量。只能使用字母、数字、短横线和下划线，不是公司展示名称。</small></div>
             <fieldset><legend>这个 Agent 可以做什么？</legend>{taskOptions.map((task) => <label className="choice-row" htmlFor={`task-${task.id}`} key={task.id}><input id={`task-${task.id}`} aria-label={task.title} type="checkbox" checked={tasks.includes(task.id)} onChange={() => setTasks((current) => current.includes(task.id) ? current.filter((item) => item !== task.id) : [...current, task.id])} /><span><b>{task.title}</b><small>{task.note}</small><code>{task.id}</code></span></label>)}</fieldset>
-            <div className="info-card"><b>当前领域边界</b><p>此版本已经安装 <code>research</code> 研究领域包。向导会配置现有 Agent 的运行权限；新增法务、客服等新领域仍需先安装相应 Domain Pack。</p></div>
+            <div className="info-card"><b>当前领域边界</b><p>此版本已经安装 <code>research</code> 研究领域包和 <code>finance</code> 金融研究领域包。金融 Agent 覆盖宏观、A 股、美股和受审批保护的简报发布，不提供个性化荐股、收益承诺或自动交易。</p></div>
           </div>}
 
           {step === 1 && <div className="form-section">
-            <div className="step-explainer"><b>可以只用本地 Agent</b><p>不选厂商也能运行确定性本地流程。需要大模型生成答案时，再选择一个或多个已开户的厂商。</p></div>
+            <div className="step-explainer"><b>可以只用本地 Agent</b><p>不选模型厂商也能运行确定性分析和风险指标计算。需要大模型把事实改写成更自然的报告时，再选择一个或多个已开户的厂商；行情数据源在下一步单独配置。</p></div>
             <div className="provider-grid">{providers.map((provider) => <label className={`provider-card ${selected.includes(provider.id) ? "selected" : ""}`} htmlFor={`provider-${provider.id}`} key={provider.id}><input id={`provider-${provider.id}`} aria-label={`选择 ${provider.name}`} type="checkbox" checked={selected.includes(provider.id)} onChange={() => toggleProvider(provider.id)} /><span className="provider-state">{selected.includes(provider.id) ? "已选择" : "选择"}</span><b>{provider.name}</b><code>{provider.id}</code><p>{provider.preparation}</p><a href={provider.url} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>打开官方申请页面 ↗</a></label>)}</div>
           </div>}
 
@@ -239,17 +285,39 @@ export default function SetupPage() {
               {provider.baseUrlEnv && <div className="field"><label htmlFor={`${provider.id}-url`}>Base URL（按账号需要填写） <code>{provider.baseUrlEnv}</code></label><input id={`${provider.id}-url`} value={values[provider.id].baseUrl} onChange={(event) => updateProvider(provider.id, { baseUrl: event.target.value })} placeholder="不确定时留空，系统使用官方默认地址" /><small>只接受该厂商官方 HTTPS 域名；后台还会做一次白名单校验。</small></div>}
               <fieldset><legend>模型档位（第一项是默认模型）</legend><p className="field-note">系统最多允许三档。官方公开 ID 已预填；标有“需替换”的厂商必须从你的账号复制真实模型或 Endpoint ID。</p>{values[provider.id].models.map((model, index) => <div className="model-field" key={`${provider.id}-${index}`}><span>{index === 0 ? "高能力" : index === 1 ? "均衡" : "高速/低成本"}</span><input value={model} onChange={(event) => updateModel(provider.id, index, event.target.value)} aria-label={`${provider.name} 第 ${index + 1} 档模型`} /><i>{model.startsWith("replace-with-") ? "需替换" : "已填写"}</i></div>)}</fieldset>
             </article>)}
+            {financeEnabled && <article className="finance-data-card">
+              <div className="credential-head"><div><span>MARKET DATA</span><h3>金融事实数据</h3></div><Link href="/finance">打开金融工作台 →</Link></div>
+              <div className="mode-choice" role="radiogroup" aria-label="金融数据模式">
+                <label className={financeDataMode === "fixture" ? "active" : ""}><input type="radio" name="finance-data-mode" checked={financeDataMode === "fixture"} onChange={() => setFinanceDataMode("fixture")} /><b>内置样例</b><small>无需密钥，适合首次部署、自测试和演示。</small></label>
+                <label className={financeDataMode === "live" ? "active" : ""}><input type="radio" name="finance-data-mode" checked={financeDataMode === "live"} onChange={() => setFinanceDataMode("live")} /><b>真实数据</b><small>调用官方 API；请核对授权、时效和商业使用条款。</small></label>
+              </div>
+              {financeDataMode === "live" && <div className="data-key-grid">
+                {(tasks.includes("finance.a_share.analyze") || tasks.includes("finance.macro.analyze")) && <div className="field"><label htmlFor="tushare-token">Tushare Token</label><input id="tushare-token" type="password" autoComplete="off" value={tushareToken} onChange={(event) => setTushareToken(event.target.value)} placeholder="用于 A 股与中国宏观数据" /><small><a href="https://tushare.pro/document/1?doc_id=130" target="_blank" rel="noreferrer">查看官方 HTTP API 文档 ↗</a></small></div>}
+                {tasks.includes("finance.us_stock.analyze") && <div className="field"><label htmlFor="alphavantage-key">Alpha Vantage API Key</label><input id="alphavantage-key" type="password" autoComplete="off" value={alphaVantageKey} onChange={(event) => setAlphaVantageKey(event.target.value)} placeholder="用于美股日线数据" /><small><a href="https://www.alphavantage.co/documentation/" target="_blank" rel="noreferrer">查看官方 API 文档 ↗</a></small></div>}
+                {tasks.includes("finance.macro.analyze") && <div className="field"><label htmlFor="fred-key">FRED API Key</label><input id="fred-key" type="password" autoComplete="off" value={fredKey} onChange={(event) => setFredKey(event.target.value)} placeholder="用于美国宏观时间序列" /><small><a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank" rel="noreferrer">查看官方 API Key 文档 ↗</a></small></div>}
+              </div>}
+              <div className="data-boundary"><b>数据与结论分离</b><p>后台会统一代码、日期、单位与错误格式，再计算区间收益、历史波动率和最大回撤。任何数据缺失都会返回“证据不足”，不会用模型补造行情。</p></div>
+            </article>}
           </div>}
 
           {step === 3 && <div className="form-section">
             <div className="field"><label htmlFor="customer-key">给外部调用方的客户 API Key</label><div className="input-action"><input id="customer-key" type="password" autoComplete="off" value={customerKey} onChange={(event) => setCustomerKey(event.target.value)} /><button onClick={() => setCustomerKey(randomSecret())}>重新生成</button></div><small>这不是模型厂商 Key。你的客户调用 <code>/v1/agent/runs</code> 时使用它；每个客户必须不同，至少 32 字符。</small></div>
             <div className="two-fields"><div className="field"><label htmlFor="rate">每分钟最多请求数</label><input id="rate" type="number" min="1" max="100000" value={rateLimit} onChange={(event) => setRateLimit(Number(event.target.value))} /><small>防止突发流量压垮预算。建议试运行从 60 开始。</small></div><div className="field"><label htmlFor="quota">每月最多请求数</label><input id="quota" type="number" min="1" max="1000000000" value={monthlyQuota} onChange={(event) => setMonthlyQuota(Number(event.target.value))} /><small>超过后自动拒绝，不会继续产生模型费用。</small></div></div>
             <div className="field"><label htmlFor="default-provider">默认生成方式</label><select id="default-provider" value={defaultProvider} onChange={(event) => setDefaultProvider(event.target.value)}><option value="local">本地确定性流程（不调用大模型）</option>{chosenProviders.map((provider) => <option key={provider.id} value={provider.id}>{provider.name} / {values[provider.id].models[0]}</option>)}</select><small>调用方不指定 provider 时使用此项。仍会受到任务、模型白名单和 Policy 约束。</small></div>
+            {financeEnabled && <article className="integration-card">
+              <label className="integration-toggle" htmlFor="wechat-enabled"><input id="wechat-enabled" type="checkbox" checked={wechatEnabled} onChange={(event) => setWechatEnabled(event.target.checked)} /><span><b>接入微信公众号</b><small>让用户发送“宏观 中国”“A股 600000”或“美股 AAPL”，获得被动文本回复。</small></span><i>{wechatEnabled ? "已启用" : "未启用"}</i></label>
+              {wechatEnabled && <div className="integration-fields">
+                <div className="field"><label htmlFor="public-api">公网 HTTPS API 地址</label><input id="public-api" value={publicApiBase} onChange={(event) => setPublicApiBase(event.target.value)} placeholder="https://api.example.com" /><small>必须可从公网访问，并把请求转发到本系统 API 服务。</small></div>
+                <div className="field"><label htmlFor="wechat-token">微信公众号 Token</label><div className="input-action"><input id="wechat-token" type="password" autoComplete="off" value={wechatToken} onChange={(event) => setWechatToken(event.target.value)} /><button onClick={() => setWechatToken(randomSecret())}>重新生成</button></div><small>将同一值填到微信公众平台“服务器配置”的 Token。它不是 AppSecret。</small></div>
+                <div className="field"><label htmlFor="wechat-data-mode">公众号回复数据模式</label><select id="wechat-data-mode" value={wechatDataMode} onChange={(event) => setWechatDataMode(event.target.value)}><option value="fixture">内置样例（推荐，响应稳定）</option><option value="live">实时调用数据 API（需自行保证 5 秒内完成）</option></select></div>
+                <div className="callback-box"><span>复制到微信公众平台的 URL</span><code>{publicApiBase.replace(/\/$/, "")}/v1/channels/wechat/official-account</code><small>当前版本仅支持“明文模式”的被动文本回复；消息加密、安全模式和主动群发尚未开放。</small></div>
+              </div>}
+            </article>}
             <div className="policy-lock"><span>LOCKED</span><div><b>高风险写操作不会在 UI 中预批准</b><p><code>approved_capabilities</code> 固定为空。外部请求不能携带审批，发布任务会在运行时安全失败或进入可信审批流程。</p></div></div>
           </div>}
 
           {step === 4 && <div className="form-section">
-            <div className="review-grid"><div><span>客户</span><strong>{tenantId}</strong></div><div><span>任务</span><strong>{tasks.length} 项</strong></div><div><span>外部厂商</span><strong>{chosenProviders.length} 家</strong></div><div><span>默认方式</span><strong>{defaultProvider}</strong></div></div>
+            <div className="review-grid"><div><span>客户</span><strong>{tenantId}</strong></div><div><span>任务</span><strong>{tasks.length} 项</strong></div><div><span>外部厂商</span><strong>{chosenProviders.length} 家</strong></div><div><span>默认方式</span><strong>{defaultProvider}</strong></div>{financeEnabled && <div><span>金融数据</span><strong>{financeDataMode === "live" ? "官方 API" : "内置样例"}</strong></div>}{financeEnabled && <div><span>微信公众号</span><strong>{wechatEnabled ? "被动回复已配置" : "未启用"}</strong></div>}</div>
             <div className="conversion-flow" id="how-it-works"><div><span>01</span><b>表单输入</b><p>业务、人类可读选择、密钥</p></div><i>→</i><div><span>02</span><b>后台校验</b><p>厂商、域名、模型、限额</p></div><i>→</i><div><span>03</span><b>安全拆分</b><p>YAML 无密钥 / .env 有密钥</p></div><i>→</i><div><span>04</span><b>重启生效</b><p>加载权限、额度与模型网关</p></div></div>
             <details className="advanced-preview" open><summary>查看自动转换后的配置（高级，可不修改）</summary><pre>{previewYaml || localYaml}</pre></details>
             <div className="apply-panel">

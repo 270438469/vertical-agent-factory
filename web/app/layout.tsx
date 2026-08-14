@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
   const title = "Vertical Agent Factory — 交互式系统地图";
-  const description = "用真实运行链、Trace 与自测试解释如何搭建可审计的垂直 Agent 系统。";
+  const description = "用真实运行链、金融宏观/A 股/美股 Agent、微信公众号入口与自测试解释如何搭建可审计的垂直 Agent 系统。";
   return {
     title,
     description,
@@ -27,9 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       type: "website",
-      images: [{ url: `${origin}/og.png`, width: 1536, height: 1024, alt: "Vertical Agent Factory execution pipeline" }],
+      images: [{ url: `${origin}/og-finance-agent.png`, width: 1536, height: 1024, alt: "Vertical Agent Factory finance agent research terminal" }],
     },
-    twitter: { card: "summary_large_image", title, description, images: [`${origin}/og.png`] },
+    twitter: { card: "summary_large_image", title, description, images: [`${origin}/og-finance-agent.png`] },
   };
 }
 

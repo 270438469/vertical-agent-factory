@@ -1,0 +1,36 @@
+version: 1.0.0
+
+entities:
+  MacroIndicator:
+    identifiers: [series_id]
+    aliases: [economic indicator]
+    properties: [region, period, value, previous_value, source]
+  Equity:
+    identifiers: [symbol]
+    aliases: [stock, security]
+    properties: [market, currency, exchange]
+  MarketObservation:
+    identifiers: [symbol, date]
+    aliases: [bar, quote]
+    properties: [open, high, low, close, volume, source]
+  FinancialAnalysis:
+    identifiers: [run_id]
+    aliases: [briefing]
+    properties: [as_of, facts, inferences, risks, uncertainties, disclaimer]
+
+relations:
+  - from: FinancialAnalysis
+    relation: analyzes
+    to: Equity
+  - from: FinancialAnalysis
+    relation: supported_by
+    to: MarketObservation
+  - from: FinancialAnalysis
+    relation: supported_by
+    to: MacroIndicator
+
+invariants:
+  - Every successful analysis includes an as-of date and at least one data-source reference.
+  - Facts, inferences and uncertainties remain separate.
+  - No output contains a guaranteed return, personalized recommendation or executable trade instruction.
+  - Every output contains the investment-research disclaimer.
